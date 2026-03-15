@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'BPG Nino Mtavruli', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --color-primary: #50529D;
+    --color-primary-light: #7274C2;
+    --color-primary-dark: #3a3c75;
+}
