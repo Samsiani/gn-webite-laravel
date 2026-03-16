@@ -94,6 +94,8 @@ Use for:
 - Config: `config/lunar/media.php` (products + collections only, blog is in model)
 - Regenerate: `php artisan media-library:regenerate --only-missing --force` (via SSH)
 - Blog media: must reimport posts if conversions change (conversions generated on upload)
+- ALWAYS use `getFirstMediaUrl('collection', 'thumb')` with fallback for all thumbnails
+- Homepage blog section, blog archive, blog sidebar — all must use `'thumb'` conversion
 
 ## Blog Import
 - Command: `php artisan gn:import-blog --limit=5`
@@ -101,3 +103,14 @@ Use for:
 - Converts HTML to block format, maps product links via wp_id_map
 - Featured images get thumb + large WebP conversions on upload
 - To re-import: delete posts first via tinker, then run import command
+
+## Mobile
+- Header: logo (gn-mobile-logo.png) | full-width search bar | hamburger menu
+- Drawer: slides from RIGHT side, includes language switcher + nav + contact
+- Bottom navbar: fixed, 4 icons — Home, Shop, Cart, Account
+- `pb-16` on main content to avoid bottom nav overlap
+- `font-size: 16px !important` on all inputs to prevent iOS zoom
+- Search dropdown: `fixed left-2 right-2` on mobile (near full width)
+- Top bar (phone/email) hidden on mobile — shown in drawer instead
+- Favicon: `/favicon.png` (32x32) from GN icon
+- Apple touch icon: `/apple-touch-icon.png` (180x180)
