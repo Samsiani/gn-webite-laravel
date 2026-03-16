@@ -276,7 +276,7 @@
                     $bpTitle = $bp->t('title', $locale);
                     $bpSlug = $bp->t('slug', $locale);
                     $bpExcerpt = $bp->t('excerpt', $locale);
-                    $bpImage = $bp->getFirstMediaUrl('featured');
+                    $bpImage = $bp->getFirstMediaUrl('featured', 'thumb') ?: $bp->getFirstMediaUrl('featured');
                 @endphp
                 <a wire:navigate href="{{ $prefix }}/blog/{{ $bpSlug }}"
                    class="bg-white rounded-xl border border-gray-100 overflow-hidden group product-card block">
