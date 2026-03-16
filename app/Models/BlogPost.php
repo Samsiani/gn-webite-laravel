@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BlogPost extends Model implements HasMedia
 {
@@ -43,6 +45,21 @@ class BlogPost extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('featured')->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->fit(Fit::Crop, 600, 400)
+            ->format('webp')
+            ->quality(80)
+            ->nonQueued();
+
+        $this->addMediaConversion('large')
+            ->fit(Fit::Contain, 1200, 800)
+            ->format('webp')
+            ->quality(85)
+            ->nonQueued();
     }
 
     // Translation helpers

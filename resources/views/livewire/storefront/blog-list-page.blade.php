@@ -19,13 +19,14 @@
                     $postTitle = $post->t('title', $locale);
                     $postExcerpt = $post->t('excerpt', $locale);
                     $postSlug = $post->t('slug', $locale);
-                    $image = $post->getFirstMediaUrl('featured');
+                    $image = $post->getFirstMediaUrl('featured', 'thumb') ?: $post->getFirstMediaUrl('featured');
                 @endphp
                 <a wire:navigate href="{{ $prefix }}/blog/{{ $postSlug }}"
                    class="bg-white rounded-xl border border-gray-100 overflow-hidden group product-card block">
                     <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
                         @if($image)
                             <img src="{{ $image }}" alt="{{ $postTitle }}" loading="lazy"
+                                 onload="this.classList.add('loaded')"
                                  class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center">

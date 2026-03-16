@@ -3,7 +3,7 @@
     $title = $post->t('title', $locale);
     $content = $post->t('content', $locale);
     $excerpt = $post->t('excerpt', $locale);
-    $image = $post->getFirstMediaUrl('featured');
+    $image = $post->getFirstMediaUrl('featured', 'large') ?: $post->getFirstMediaUrl('featured');
 @endphp
 <div>
     <div class="max-w-[1400px] mx-auto px-4 py-6">
@@ -99,12 +99,12 @@
                             @php
                                 $recentTitle = $recent->t('title', $locale);
                                 $recentSlug = $recent->t('slug', $locale);
-                                $recentImage = $recent->getFirstMediaUrl('featured');
+                                $recentImage = $recent->getFirstMediaUrl('featured', 'thumb') ?: $recent->getFirstMediaUrl('featured');
                             @endphp
                             <a wire:navigate href="{{ $prefix }}/blog/{{ $recentSlug }}" class="flex gap-3 group">
                                 <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                                     @if($recentImage)
-                                        <img src="{{ $recentImage }}" alt="{{ $recentTitle }}" class="w-full h-full object-cover" loading="lazy">
+                                        <img src="{{ $recentImage }}" alt="{{ $recentTitle }}" class="w-full h-full object-cover" loading="lazy" onload="this.classList.add('loaded')">
                                     @endif
                                 </div>
                                 <div class="min-w-0">
