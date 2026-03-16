@@ -54,15 +54,15 @@
 @php $locale = app()->getLocale(); $prefix = $locale === 'ka' ? '' : '/' . $locale; @endphp
 <body class="bg-surface text-gray-700 antialiased">
 
-    {{-- Top bar --}}
-    <div class="bg-primary text-white text-xs">
+    {{-- Top bar (desktop only) --}}
+    <div class="hidden lg:block bg-primary text-white text-xs">
         <div class="max-w-[1400px] mx-auto px-4 flex items-center justify-between h-9">
             <div class="flex items-center gap-4">
                 <a href="tel:+995593737673" class="flex items-center gap-1 hover:text-primary-100 transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     +995 593 73 76 73
                 </a>
-                <a href="mailto:info@gn.ge" class="hidden sm:flex items-center gap-1 hover:text-primary-100 transition">
+                <a href="mailto:info@gn.ge" class="flex items-center gap-1 hover:text-primary-100 transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     info@gn.ge
                 </a>
@@ -132,29 +132,17 @@
                     @livewire('storefront.cart-manager')
                 </div>
             </div>
-            {{-- Mobile header --}}
-            <div class="flex lg:hidden items-center justify-between h-14">
-                <button @click="mobileNav = true" aria-label="Menu" class="p-2 text-gray-600 hover:text-primary transition -ml-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                <a wire:navigate href="{{ $prefix ?? '' }}/">
-                    <img src="/images/logo.png" alt="GN Industrial" class="h-8 w-auto">
+            {{-- Mobile header: logo | search | hamburger --}}
+            <div class="flex lg:hidden items-center gap-2.5 h-14">
+                <a wire:navigate href="{{ $prefix ?? '' }}/" class="shrink-0">
+                    <img src="/images/logo.png" alt="GN Industrial" class="h-7 w-auto">
                 </a>
-                <div class="flex items-center gap-0.5">
-                    <a wire:navigate href="{{ route('search') }}" aria-label="Search" class="p-2 text-gray-500 hover:text-primary transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </a>
-                    @auth
-                        <a wire:navigate href="{{ ($prefix ?? '') }}/my-account" class="p-2 text-gray-500 hover:text-primary transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        </a>
-                    @else
-                        <a wire:navigate href="{{ ($prefix ?? '') }}/login" class="p-2 text-gray-500 hover:text-primary transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        </a>
-                    @endauth
-                    @livewire('storefront.cart-manager', [], key('cart-m'))
+                <div class="flex-1 min-w-0">
+                    @livewire('storefront.live-search', [], key('mobile-search'))
                 </div>
+                <button @click="mobileNav = true" aria-label="Menu" class="shrink-0 p-1.5 text-gray-500 hover:text-primary transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                </button>
             </div>
         </div>
         {{-- Desktop nav bar --}}
@@ -166,7 +154,7 @@
     </header>
 
     {{-- Main Content --}}
-    <main>
+    <main class="pb-16 lg:pb-0">
         {{ $slot }}
     </main>
 
@@ -229,6 +217,35 @@
             </div>
         </div>
     </footer>
+
+    {{-- Mobile bottom navbar --}}
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 lg:hidden" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="flex items-center justify-around h-14">
+            @php
+                $currentPath = request()->path();
+                $isHome = $currentPath === '/' || $currentPath === '' || $currentPath === 'en' || $currentPath === 'ru';
+                $isShop = str_contains($currentPath, 'shop') || str_contains($currentPath, 'category') || str_contains($currentPath, 'product');
+                $isCart = str_contains($currentPath, 'cart') || str_contains($currentPath, 'checkout');
+                $isAccount = str_contains($currentPath, 'my-account') || str_contains($currentPath, 'login') || str_contains($currentPath, 'register');
+            @endphp
+            <a wire:navigate href="{{ $prefix ?? '' }}/" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isHome ? 'text-primary' : 'text-gray-400' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isHome ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+                <span class="text-[10px] font-medium">{{ __('Home') }}</span>
+            </a>
+            <a wire:navigate href="{{ ($prefix ?? '') }}/shop" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isShop ? 'text-primary' : 'text-gray-400' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isShop ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span class="text-[10px] font-medium">{{ __('Shop') }}</span>
+            </a>
+            <a wire:navigate href="{{ ($prefix ?? '') }}/cart" class="flex flex-col items-center gap-0.5 px-3 py-1 relative {{ $isCart ? 'text-primary' : 'text-gray-400' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isCart ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                <span class="text-[10px] font-medium">{{ __('Cart') }}</span>
+            </a>
+            <a wire:navigate href="{{ ($prefix ?? '') }}/{{ auth()->check() ? 'my-account' : 'login' }}" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isAccount ? 'text-primary' : 'text-gray-400' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isAccount ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[10px] font-medium">{{ __('Account') }}</span>
+            </a>
+        </div>
+    </nav>
 
     {{-- Loading progress bar --}}
     <div id="nav-progress" class="navigate-loading-bar" style="width:0;opacity:0"></div>
