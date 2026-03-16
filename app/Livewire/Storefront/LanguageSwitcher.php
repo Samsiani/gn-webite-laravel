@@ -38,51 +38,35 @@ class LanguageSwitcher extends Component
             'ru' => '/ru',
         ];
 
-        // Product page — find translated slugs
+        // Product page — find translated slugs (single query)
         if ($baseRouteName === 'product.show') {
             $slug = $route->parameter('slug');
-            $productUrl = Url::where('slug', $slug)->where('element_type', 'product')->first();
+            $allUrls = Url::where('element_type', 'product')
+                ->whereIn('element_id', Url::where('slug', $slug)->where('element_type', 'product')->select('element_id'))
+                ->with('language')
+                ->get();
 
-            if ($productUrl) {
-                $allUrls = Url::where('element_type', 'product')
-                    ->where('element_id', $productUrl->element_id)
-                    ->with('language')
-                    ->get();
-
-                foreach ($allUrls as $url) {
-                    $lang = $url->language?->code;
-                    if ($lang === 'ka') {
-                        $links['ka'] = '/product/' . $url->slug;
-                    } elseif ($lang === 'en') {
-                        $links['en'] = '/en/product/' . $url->slug;
-                    } elseif ($lang === 'ru') {
-                        $links['ru'] = '/ru/product/' . $url->slug;
-                    }
-                }
+            foreach ($allUrls as $url) {
+                $lang = $url->language?->code;
+                if ($lang === 'ka') $links['ka'] = '/product/' . $url->slug;
+                elseif ($lang === 'en') $links['en'] = '/en/product/' . $url->slug;
+                elseif ($lang === 'ru') $links['ru'] = '/ru/product/' . $url->slug;
             }
         }
 
-        // Category page — find translated slugs
+        // Category page — find translated slugs (single query)
         if ($baseRouteName === 'category.show') {
             $slug = $route->parameter('slug');
-            $collectionUrl = Url::where('slug', $slug)->where('element_type', 'collection')->first();
+            $allUrls = Url::where('element_type', 'collection')
+                ->whereIn('element_id', Url::where('slug', $slug)->where('element_type', 'collection')->select('element_id'))
+                ->with('language')
+                ->get();
 
-            if ($collectionUrl) {
-                $allUrls = Url::where('element_type', 'collection')
-                    ->where('element_id', $collectionUrl->element_id)
-                    ->with('language')
-                    ->get();
-
-                foreach ($allUrls as $url) {
-                    $lang = $url->language?->code;
-                    if ($lang === 'ka') {
-                        $links['ka'] = '/category/' . $url->slug;
-                    } elseif ($lang === 'en') {
-                        $links['en'] = '/en/category/' . $url->slug;
-                    } elseif ($lang === 'ru') {
-                        $links['ru'] = '/ru/category/' . $url->slug;
-                    }
-                }
+            foreach ($allUrls as $url) {
+                $lang = $url->language?->code;
+                if ($lang === 'ka') $links['ka'] = '/category/' . $url->slug;
+                elseif ($lang === 'en') $links['en'] = '/en/category/' . $url->slug;
+                elseif ($lang === 'ru') $links['ru'] = '/ru/category/' . $url->slug;
             }
         }
 

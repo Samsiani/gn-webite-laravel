@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 use Lunar\Models\Url;
 
@@ -103,13 +103,7 @@ class ProductListingPage extends Component
             : collect();
 
         // Root categories for nav
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()
-                ->with(['urls.language'])
-                ->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         // Breadcrumbs
         $breadcrumbs = collect();

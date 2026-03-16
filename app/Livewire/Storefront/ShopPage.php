@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 
 class ShopPage extends Component
@@ -66,14 +66,7 @@ class ShopPage extends Component
         }
 
         // All root categories with product counts
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()
-                ->with(['urls.language'])
-                ->withCount('products')
-                ->get()
-            : collect();
+        $categories = StorefrontData::categoriesWithCounts();
 
         $hasFilters = $this->q || $this->categoryId || $this->priceMin || $this->priceMax;
 

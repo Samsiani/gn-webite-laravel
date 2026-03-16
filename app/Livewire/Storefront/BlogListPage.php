@@ -4,10 +4,9 @@ namespace App\Livewire\Storefront;
 
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use App\Services\StorefrontData;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 
 class BlogListPage extends Component
 {
@@ -46,11 +45,7 @@ class BlogListPage extends Component
         $posts = $query->paginate(9);
         $blogCategories = BlogCategory::withCount(['posts' => fn ($q) => $q->published()])->orderBy('position')->get();
 
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.blog-list-page', [
             'posts' => $posts,

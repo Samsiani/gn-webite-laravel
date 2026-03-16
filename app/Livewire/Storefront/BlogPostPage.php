@@ -3,9 +3,8 @@
 namespace App\Livewire\Storefront;
 
 use App\Models\BlogPost;
+use App\Services\StorefrontData;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 
 class BlogPostPage extends Component
 {
@@ -51,11 +50,7 @@ class BlogPostPage extends Component
             $hreflangs['ru'] = url('/ru/blog/' . $this->post->slug_ru);
         }
 
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.blog-post-page', [
             'recentPosts' => $recentPosts,

@@ -3,11 +3,10 @@
 namespace App\Livewire\Storefront;
 
 use App\Models\User;
+use App\Services\StorefrontData;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 use Lunar\Models\Customer;
 
 #[Layout('components.layouts.storefront')]
@@ -86,10 +85,7 @@ class RegisterPage extends Component
 
     public function render()
     {
-        $group = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $group
-            ? LunarCollection::where('collection_group_id', $group->id)->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.register-page')
             ->layoutData(['categories' => $categories]);

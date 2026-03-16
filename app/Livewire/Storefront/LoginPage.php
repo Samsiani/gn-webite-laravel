@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 
 #[Layout('components.layouts.storefront')]
 class LoginPage extends Component
@@ -63,17 +62,9 @@ class LoginPage extends Component
 
     public function render()
     {
-        $categories = $this->getCategories();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.login-page')
             ->layoutData(['categories' => $categories]);
-    }
-
-    private function getCategories()
-    {
-        $group = CollectionGroup::where('handle', 'product-categories')->first();
-        return $group
-            ? LunarCollection::where('collection_group_id', $group->id)->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
     }
 }

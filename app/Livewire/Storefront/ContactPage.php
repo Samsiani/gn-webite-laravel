@@ -7,9 +7,8 @@ use App\Mail\ContactFormMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Services\StorefrontData;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 
 class ContactPage extends Component
 {
@@ -95,11 +94,7 @@ class ContactPage extends Component
 
     public function render()
     {
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.contact-page')
             ->layout('components.layouts.storefront', ['categories' => $categories]);

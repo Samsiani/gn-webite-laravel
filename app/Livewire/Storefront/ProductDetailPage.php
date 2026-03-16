@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 use Lunar\Models\Url;
 
@@ -116,11 +115,7 @@ class ProductDetailPage extends Component
         }
 
         // Root categories for nav
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         // Merge featured image + gallery images
         $images = $this->product->getMedia('images')

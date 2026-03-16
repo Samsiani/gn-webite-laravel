@@ -2,26 +2,15 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Livewire\Component;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 
 class HomePage extends Component
 {
     public function render()
     {
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()
-                ->withCount('products')
-                ->with(['urls.language', 'media'])
-                ->get()
-                ->filter(fn ($c) => $c->products_count > 0)
-                ->values()
-            : collect();
+        $categories = StorefrontData::categories();
 
         $latest = Product::where('status', 'published')
             ->with(['variants.prices', 'urls.language', 'media'])

@@ -2,13 +2,11 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Address;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
-use Lunar\Models\Country;
 use Lunar\Models\Order;
 
 class CheckoutPage extends Component
@@ -51,7 +49,7 @@ class CheckoutPage extends Component
         $this->email = $user->email ?? '';
         $this->phone = $user->phone ?? '';
 
-        $customer = $user->customers()->first();
+        $customer = $this->getCustomer();
         if ($customer) {
             $default = $customer->addresses()
                 ->where('shipping_default', true)
@@ -78,7 +76,7 @@ class CheckoutPage extends Component
         $user = Auth::guard('web')->user();
         if (! $user) return;
 
-        $customer = $user->customers()->first();
+        $customer = $this->getCustomer();
         if (! $customer) return;
 
         $address = $customer->addresses()->find($addressId);
@@ -105,7 +103,7 @@ class CheckoutPage extends Component
     {
         $user = Auth::guard('web')->user();
         if (! $user) return;
-        $customer = $user->customers()->first();
+        $customer = $this->getCustomer();
         if (! $customer) return;
         $address = $customer->addresses()->find($id);
         if (! $address) return;
@@ -134,10 +132,10 @@ class CheckoutPage extends Component
 
         $user = Auth::guard('web')->user();
         if (! $user) return;
-        $customer = $user->customers()->first();
+        $customer = $this->getCustomer();
         if (! $customer) return;
 
-        $country = Country::where('iso2', 'GE')->first();
+        $country = StorefrontData::countryGE();
 
         $data = [
             'customer_id' => $customer->id,
@@ -171,6 +169,18 @@ class CheckoutPage extends Component
         $this->resetModalFields();
     }
 
+    private $cachedCustomer = false;
+
+    private function getCustomer()
+    {
+        if ($this->cachedCustomer !== false) return $this->cachedCustomer;
+
+        $user = Auth::guard('web')->user();
+        if (! $user) return $this->cachedCustomer = null;
+
+        return $this->cachedCustomer = $this->getCustomer();
+    }
+
     private function resetModalFields(): void
     {
         $this->modal_addr_first_name = '';
@@ -186,7 +196,7 @@ class CheckoutPage extends Component
         $user = Auth::guard('web')->user();
         if (! $user) return;
 
-        $customer = $user->customers()->first();
+        $customer = $this->getCustomer();
         if (! $customer) return;
 
         $address = $customer->addresses()->find($id);
@@ -237,7 +247,7 @@ class CheckoutPage extends Component
             return;
         }
 
-        $country = Country::where('iso2', 'GE')->first();
+        $country = StorefrontData::countryGE();
 
         $cart->setBillingAddress([
             'country_id' => $country?->id,
@@ -282,7 +292,7 @@ class CheckoutPage extends Component
 
         if ($user) {
             $updateData['user_id'] = $user->id;
-            $customer = $user->customers()->first();
+            $customer = $this->getCustomer();
             if ($customer) {
                 $updateData['customer_id'] = $customer->id;
             }
@@ -310,17 +320,13 @@ class CheckoutPage extends Component
         $savedAddresses = collect();
         $user = Auth::guard('web')->user();
         if ($user) {
-            $customer = $user->customers()->first();
+            $customer = $this->getCustomer();
             if ($customer) {
                 $savedAddresses = $customer->addresses()->get();
             }
         }
 
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.checkout-page', [
             'cart' => $cart,

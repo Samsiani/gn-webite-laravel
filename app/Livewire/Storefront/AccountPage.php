@@ -2,15 +2,13 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Lunar\Models\Address;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
-use Lunar\Models\Country;
 use Lunar\Models\Order;
 
 #[Layout('components.layouts.storefront')]
@@ -162,7 +160,7 @@ class AccountPage extends Component
         $customer = $this->getCustomer();
         if (! $customer) return;
 
-        $country = Country::where('iso2', 'GE')->first();
+        $country = StorefrontData::countryGE();
 
         $data = [
             'customer_id' => $customer->id,
@@ -250,16 +248,21 @@ class AccountPage extends Component
         return view('livewire.storefront.account-page', [
             'orders' => $orders,
             'addresses' => $addresses,
-        ])->layoutData(['categories' => $this->getCategories()]);
+        ])->layoutData(['categories' => StorefrontData::categories()]);
     }
 
     // ── Helpers ──
 
+    private $cachedCustomer = false;
+
     private function getCustomer()
     {
+        if ($this->cachedCustomer !== false) return $this->cachedCustomer;
+
         $user = Auth::guard('web')->user();
-        if (! $user) return null;
-        return $user->customers()->latest('lunar_customer_user.created_at')->first();
+        if (! $user) return $this->cachedCustomer = null;
+
+        return $this->cachedCustomer = $user->customers()->latest('lunar_customer_user.created_at')->first();
     }
 
     private function localePath(string $path): string
@@ -268,11 +271,4 @@ class AccountPage extends Component
         return ($locale === 'ka' ? '' : '/' . $locale) . $path;
     }
 
-    private function getCategories()
-    {
-        $group = CollectionGroup::where('handle', 'product-categories')->first();
-        return $group
-            ? LunarCollection::where('collection_group_id', $group->id)->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
-    }
 }

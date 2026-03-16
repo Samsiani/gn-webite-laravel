@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Services\StorefrontData;
 use Livewire\Component;
 use Lunar\Facades\CartSession;
-use Lunar\Models\Collection as LunarCollection;
-use Lunar\Models\CollectionGroup;
 
 class CartPage extends Component
 {
@@ -37,11 +36,7 @@ class CartPage extends Component
         $cart = CartSession::current(calculate: true);
         $lines = $cart ? $cart->lines->load('purchasable.product.urls.language', 'purchasable.product.media', 'purchasable.prices') : collect();
 
-        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
-        $categories = $collectionGroup
-            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
-                ->whereIsRoot()->with(['urls.language'])->get()
-            : collect();
+        $categories = StorefrontData::categories();
 
         return view('livewire.storefront.cart-page', [
             'cart' => $cart,
