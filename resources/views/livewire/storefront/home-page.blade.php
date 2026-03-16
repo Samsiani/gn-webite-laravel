@@ -4,9 +4,17 @@
     @php $slides = \App\Models\Slide::active()->with('media')->get(); @endphp
     @if($slides->isNotEmpty())
     <section class="relative text-white overflow-hidden"
-             x-data="{ slide: 0, auto: null }"
-             x-init="auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
-             @mouseenter="clearInterval(auto)" @mouseleave="auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)">
+             x-data="{
+                slide: 0, auto: null, total: {{ $slides->count() }}, touchX: 0,
+                next() { this.slide = (this.slide + 1) % this.total },
+                prev() { this.slide = (this.slide - 1 + this.total) % this.total },
+                startAuto() { this.auto = setInterval(() => this.next(), 8000) },
+                stopAuto() { clearInterval(this.auto) }
+             }"
+             x-init="startAuto()"
+             @mouseenter="stopAuto()" @mouseleave="startAuto()"
+             @touchstart.passive="touchX = $event.touches[0].clientX; stopAuto()"
+             @touchend.passive="let diff = touchX - $event.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? next() : prev() } startAuto()"
 
         @foreach($slides as $i => $s)
             @php
