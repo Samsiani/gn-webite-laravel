@@ -90,5 +90,14 @@ Use for:
 ## Media
 - Products: `ProductMediaDefinitions` — thumb (150), small (300), medium (400), large (800)
 - Collections: `CollectionMediaDefinitions` — thumb (150), small (300)
-- Config: `config/lunar/media.php`
+- BlogPosts: conversions defined in model — thumb (600x400 crop), large (1200x800)
+- Config: `config/lunar/media.php` (products + collections only, blog is in model)
 - Regenerate: `php artisan media-library:regenerate --only-missing --force` (via SSH)
+- Blog media: must reimport posts if conversions change (conversions generated on upload)
+
+## Blog Import
+- Command: `php artisan gn:import-blog --limit=5`
+- Imports from WooCommerce REST API with ka/en/ru translations
+- Converts HTML to block format, maps product links via wp_id_map
+- Featured images get thumb + large WebP conversions on upload
+- To re-import: delete posts first via tinker, then run import command
