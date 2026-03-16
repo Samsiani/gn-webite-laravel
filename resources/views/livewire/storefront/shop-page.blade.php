@@ -65,7 +65,13 @@
                 {{-- Header --}}
                 <div class="flex items-center justify-between mb-5">
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ __('Shop') }}</h1>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">
+                            @if($q)
+                                {{ __('Search') }}: "{{ $q }}"
+                            @else
+                                {{ __('Shop') }}
+                            @endif
+                        </h1>
                         <p class="text-sm text-gray-400 mt-1">{{ $products->total() }} {{ __('products') }}</p>
                     </div>
                     <select wire:model.live="sort"
@@ -123,7 +129,7 @@
                 </div>
 
                 {{-- Products Grid --}}
-                <div class="relative" wire:key="products-{{ $categoryId }}-{{ $sort }}-{{ $priceMin }}-{{ $priceMax }}-{{ $products->currentPage() }}">
+                <div class="relative" wire:key="products-{{ $q }}-{{ $categoryId }}-{{ $sort }}-{{ $priceMin }}-{{ $priceMax }}-{{ $products->currentPage() }}">
                     {{-- Skeleton loading overlay --}}
                     <div wire:loading class="absolute inset-0 z-10 bg-surface">
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">

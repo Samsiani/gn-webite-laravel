@@ -13,7 +13,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             @endif
-            <a wire:navigate href="{{ route('search') }}{{ strlen($query) >= 3 ? '?q=' . urlencode($query) : '' }}" class="bg-primary text-white rounded-lg px-3 h-full flex items-center hover:bg-primary-dark transition">
+            <a wire:navigate href="{{ $prefix }}/shop{{ strlen($query) >= 3 ? '?q=' . urlencode($query) : '' }}" class="bg-primary text-white rounded-lg px-3 h-full flex items-center hover:bg-primary-dark transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </a>
         </div>
@@ -82,7 +82,7 @@
             </div>
 
             {{-- View All --}}
-            <a wire:navigate href="{{ route('search') }}?q={{ urlencode($query) }}"
+            <a wire:navigate href="{{ $prefix }}/shop?q={{ urlencode($query) }}"
                class="block text-center py-2.5 text-sm text-primary font-medium border-t border-gray-100 hover:bg-primary-50 transition"
                @click="open = false">
                 {{ __('View all results') }} &rarr;

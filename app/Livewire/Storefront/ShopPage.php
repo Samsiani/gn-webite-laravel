@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Storefront;
 
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Lunar\Models\Collection as LunarCollection;
@@ -11,6 +12,9 @@ use Lunar\Models\Product;
 class ShopPage extends Component
 {
     use WithPagination;
+
+    #[Url(as: 'q')]
+    public string $q = '';
 
     public string $sort = 'latest';
     public ?int $categoryId = null;
@@ -37,8 +41,14 @@ class ShopPage extends Component
         $this->resetPage();
     }
 
+    public function updatedQ(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
+        $this->q = '';
         $this->categoryId = null;
         $this->priceMin = null;
         $this->priceMax = null;
@@ -65,7 +75,7 @@ class ShopPage extends Component
                 ->get()
             : collect();
 
-        $hasFilters = $this->categoryId || $this->priceMin || $this->priceMax;
+        $hasFilters = $this->q || $this->categoryId || $this->priceMin || $this->priceMax;
 
         return view('livewire.storefront.shop-page', [
             'products' => $products,
@@ -76,7 +86,7 @@ class ShopPage extends Component
 
     private function searchWithMeilisearch()
     {
-        $builder = Product::search('');
+        $builder = Product::search($this->q);
 
         // Status filter
         $builder->where('status', 'published');
@@ -118,6 +128,19 @@ class ShopPage extends Component
     {
         $query = Product::where('status', 'published')
             ->with(['variants.prices', 'urls.language', 'media']);
+
+        // Text search fallback
+        if ($this->q) {
+            $search = $this->q;
+            $table = (new Product)->getTable();
+            $jsonFn = "JSON_UNQUOTE(JSON_EXTRACT({$table}.attribute_data, '$.name.value.%s'))";
+            $query->where(function ($q) use ($search, $jsonFn) {
+                $q->whereRaw(sprintf($jsonFn, 'ka') . ' LIKE ?', ['%' . $search . '%'])
+                  ->orWhereRaw(sprintf($jsonFn, 'en') . ' LIKE ?', ['%' . $search . '%'])
+                  ->orWhereRaw(sprintf($jsonFn, 'ru') . ' LIKE ?', ['%' . $search . '%'])
+                  ->orWhereHas('variants', fn ($vq) => $vq->where('sku', 'LIKE', '%' . $search . '%'));
+            });
+        }
 
         if ($this->categoryId) {
             $collection = LunarCollection::find($this->categoryId);

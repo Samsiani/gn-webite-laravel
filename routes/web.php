@@ -11,7 +11,6 @@ use App\Livewire\Storefront\LoginPage;
 use App\Livewire\Storefront\ProductDetailPage;
 use App\Livewire\Storefront\ProductListingPage;
 use App\Livewire\Storefront\RegisterPage;
-use App\Livewire\Storefront\SearchPage;
 use App\Livewire\Storefront\ShopPage;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +20,7 @@ $storefrontRoutes = function () {
     Route::get('/shop', ShopPage::class)->name('shop');
     Route::get('/product/{slug}', ProductDetailPage::class)->name('product.show');
     Route::get('/category/{slug}', ProductListingPage::class)->name('category.show');
-    Route::get('/search', SearchPage::class)->name('search');
+    Route::get('/search', ShopPage::class)->name('search');
     Route::get('/cart', CartPage::class)->name('cart');
     Route::get('/checkout', CheckoutPage::class)->name('checkout');
     Route::get('/contact', ContactPage::class)->name('contact');
