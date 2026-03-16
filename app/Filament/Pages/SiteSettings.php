@@ -95,6 +95,11 @@ class SiteSettings extends Page implements HasForms
     {
         $data = $this->form->getState();
 
+        // Encrypt SMTP password before storing
+        if (! empty($data['mail_password'])) {
+            $data['mail_password'] = encrypt($data['mail_password']);
+        }
+
         file_put_contents(
             storage_path(static::$settingsFile),
             json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
@@ -118,13 +123,17 @@ class SiteSettings extends Page implements HasForms
             return;
         }
 
-        // Save first
+        // Save with encrypted password
+        $toSave = $settings;
+        if (! empty($toSave['mail_password'])) {
+            $toSave['mail_password'] = encrypt($toSave['mail_password']);
+        }
         file_put_contents(
             storage_path(static::$settingsFile),
-            json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            json_encode($toSave, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
         );
 
-        // Apply SMTP config on the fly
+        // Apply SMTP config on the fly (uses plaintext from form)
         static::applyMailConfig($settings);
 
         try {
@@ -163,7 +172,18 @@ class SiteSettings extends Page implements HasForms
             ];
         }
 
-        return json_decode(file_get_contents($file), true) ?: [];
+        $data = json_decode(file_get_contents($file), true) ?: [];
+
+        // Decrypt SMTP password
+        if (! empty($data['mail_password'])) {
+            try {
+                $data['mail_password'] = decrypt($data['mail_password']);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                // Already plaintext (legacy) — will be encrypted on next save
+            }
+        }
+
+        return $data;
     }
 
     public static function applyMailConfig(?array $settings = null): void

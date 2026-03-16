@@ -189,7 +189,10 @@ class CheckoutPage extends Component
         $customer = $user->customers()->first();
         if (! $customer) return;
 
-        $customer->addresses()->where('id', $id)->delete();
+        $address = $customer->addresses()->find($id);
+        if (! $address) return;
+
+        $address->delete();
 
         if ($this->selectedAddressId === $id) {
             $this->selectedAddressId = null;

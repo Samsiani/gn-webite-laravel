@@ -6,6 +6,7 @@ use App\Filament\Pages\SiteSettings;
 use App\Mail\ContactFormMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 use Lunar\Models\Collection as LunarCollection;
 use Lunar\Models\CollectionGroup;
@@ -53,6 +54,14 @@ class ContactPage extends Component
     public function submitForm(): void
     {
         $this->validate();
+
+        $key = 'contact-form:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 3)) {
+            $seconds = RateLimiter::availableIn($key);
+            $this->addError('message', __('Too many submissions. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+            return;
+        }
+        RateLimiter::hit($key, 60);
 
         try {
             $settings = SiteSettings::getSettings();

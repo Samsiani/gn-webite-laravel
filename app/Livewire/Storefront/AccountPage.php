@@ -116,8 +116,13 @@ class AccountPage extends Component
         }
 
         $user->update(['password' => $this->new_password]);
-        $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
-        session()->flash('password_success', __('Password changed successfully.'));
+
+        Auth::guard('web')->logout();
+        session()->invalidate();
+        session()->regenerateToken();
+
+        $this->redirect($this->localePath('/login'));
+        session()->flash('password_success', __('Password changed. Please sign in again.'));
     }
 
     // ── Addresses ──
@@ -191,7 +196,12 @@ class AccountPage extends Component
     public function deleteAddress(int $id): void
     {
         $customer = $this->getCustomer();
-        $customer?->addresses()->where('id', $id)->delete();
+        if (! $customer) return;
+
+        $address = $customer->addresses()->find($id);
+        if (! $address) return;
+
+        $address->delete();
     }
 
     public function resetAddressForm(): void
