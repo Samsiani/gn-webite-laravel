@@ -28,6 +28,8 @@ Use for:
 - Running seeders: `php artisan db:seed --force`
 - Product import from WooCommerce: `php artisan gn:import-wc`
 - Blog import: `php artisan gn:import-blog`
+- Meilisearch re-index: `php artisan scout:flush 'Lunar\Models\Product' && php artisan scout:import 'Lunar\Models\Product'`
+- Meilisearch sync settings: `php artisan scout:sync-index-settings`
 - Tinker / debugging: `php artisan tinker`
 - Checking logs: `tail storage/logs/laravel.log`
 - Redis/cache flush: `redis-cli FLUSHDB`
@@ -46,7 +48,19 @@ Use for:
 - PHP 8.3 at `/usr/local/lsws/lsphp83/bin/php`
 - MySQL (`gn_laravel` database)
 - Redis (sessions + cache)
+- Meilisearch v1.6.2 on `127.0.0.1:7700` (systemd service)
 - Node.js + Vite for asset builds
+
+## Meilisearch
+- Master key: stored in `.env` as `MEILISEARCH_KEY`
+- Index: `products` — 874 documents
+- Searchable: `name_ka`, `name_en`, `name_ru`, `skus` (names + SKU only, no descriptions)
+- Filterable: `status`, `brand`, `product_type`, `skus`, `collection_ids`, `price`, `__soft_deleted`
+- Sortable: `created_at`, `updated_at`, `price`, `name_ka`, `name_en`, `name_ru`
+- Custom indexer: `app/Search/ProductIndexer.php` (extends Lunar's, adds `price` + `collection_ids`)
+- Index settings defined in `config/scout.php` → `meilisearch.index-settings.products`
+- After changing settings: `php artisan scout:sync-index-settings` (via SSH)
+- After changing indexer fields: `php artisan scout:flush ... && scout:import ...` (via SSH)
 
 ## Key Paths
 - Web root: `/home/laravel.gn.ge/public_html`
@@ -59,8 +73,22 @@ Use for:
 - `staff` guard for Filament admin (/admin)
 - User model needs `carts()`, `customers()`, `orders()` relationships for Lunar
 
+## Search Architecture
+- ShopPage handles both browsing and search (`/shop?q=keyword`)
+- `/search` is an alias to ShopPage (backward compat)
+- LiveSearch header dropdown → "View all results" links to `/shop?q=`
+- SearchPage.php was removed — all search goes through ShopPage
+- Meilisearch handles search/filter/sort, then Eloquent eager-loads relationships
+
 ## URLs
+- `/shop`, `/shop?q=keyword` — unified catalog + search
 - `/login`, `/register`, `/my-account` — storefront auth
 - `/contact` — contact form (sends via SMTP from admin settings)
 - `/admin` — Filament/Lunar admin panel
 - `/admin/site-settings` — SMTP + contact email config
+
+## Media
+- Products: `ProductMediaDefinitions` — thumb (150), small (300), medium (400), large (800)
+- Collections: `CollectionMediaDefinitions` — thumb (150), small (300)
+- Config: `config/lunar/media.php`
+- Regenerate: `php artisan media-library:regenerate --only-missing --force` (via SSH)
