@@ -47,42 +47,13 @@ class ShopPage extends Component
 
     public function render()
     {
-        $query = Product::where('status', 'published')
-            ->with(['variants.prices', 'urls.language', 'media']);
+        $useMeilisearch = config('scout.driver') === 'meilisearch';
 
-        // Category filter
-        if ($this->categoryId) {
-            $collection = LunarCollection::find($this->categoryId);
-            if ($collection) {
-                $collectionIds = $collection->descendants()->pluck('id')
-                    ->merge([$collection->id]);
-                $query->whereHas('collections', function ($q) use ($collectionIds) {
-                    $q->whereIn('lunar_collections.id', $collectionIds);
-                });
-            }
+        if ($useMeilisearch) {
+            $products = $this->searchWithMeilisearch();
+        } else {
+            $products = $this->searchWithEloquent();
         }
-
-        // Price filter — join variants + prices
-        if ($this->priceMin || $this->priceMax) {
-            $query->whereHas('variants.prices', function ($q) {
-                if ($this->priceMin) {
-                    $q->where('price', '>=', (int) ($this->priceMin * 100));
-                }
-                if ($this->priceMax) {
-                    $q->where('price', '<=', (int) ($this->priceMax * 100));
-                }
-            });
-        }
-
-        // Sorting
-        $query = match ($this->sort) {
-            'price_asc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) ASC', ['product_variant']),
-            'price_desc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) DESC', ['product_variant']),
-            'name' => $query->orderByRaw("json_extract(attribute_data, '$.name.value.ka') ASC"),
-            default => $query->latest(),
-        };
-
-        $products = $query->paginate(20);
 
         // All root categories with product counts
         $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
@@ -101,5 +72,82 @@ class ShopPage extends Component
             'categories' => $categories,
             'hasFilters' => $hasFilters,
         ])->layout('components.layouts.storefront', ['categories' => $categories]);
+    }
+
+    private function searchWithMeilisearch()
+    {
+        $builder = Product::search('');
+
+        // Status filter
+        $builder->where('status', 'published');
+
+        // Category filter — include descendants
+        if ($this->categoryId) {
+            $collection = LunarCollection::find($this->categoryId);
+            if ($collection) {
+                $collectionIds = $collection->descendants()->pluck('id')
+                    ->merge([$collection->id])
+                    ->map(fn ($id) => (int) $id)
+                    ->toArray();
+                $builder->whereIn('collection_ids', $collectionIds);
+            }
+        }
+
+        // Price filter (stored in tetri)
+        if ($this->priceMin) {
+            $builder->where('price', '>=', (int) ($this->priceMin * 100));
+        }
+        if ($this->priceMax) {
+            $builder->where('price', '<=', (int) ($this->priceMax * 100));
+        }
+
+        // Sorting
+        $builder = match ($this->sort) {
+            'price_asc' => $builder->orderBy('price', 'asc'),
+            'price_desc' => $builder->orderBy('price', 'desc'),
+            'name' => $builder->orderBy('name_' . app()->getLocale(), 'asc'),
+            default => $builder->orderBy('created_at', 'desc'),
+        };
+
+        // Eager load relationships via Eloquent after Meilisearch returns IDs
+        return $builder->query(fn ($query) => $query->with(['variants.prices', 'urls.language', 'media']))
+            ->paginate(20);
+    }
+
+    private function searchWithEloquent()
+    {
+        $query = Product::where('status', 'published')
+            ->with(['variants.prices', 'urls.language', 'media']);
+
+        if ($this->categoryId) {
+            $collection = LunarCollection::find($this->categoryId);
+            if ($collection) {
+                $collectionIds = $collection->descendants()->pluck('id')
+                    ->merge([$collection->id]);
+                $query->whereHas('collections', function ($q) use ($collectionIds) {
+                    $q->whereIn('lunar_collections.id', $collectionIds);
+                });
+            }
+        }
+
+        if ($this->priceMin || $this->priceMax) {
+            $query->whereHas('variants.prices', function ($q) {
+                if ($this->priceMin) {
+                    $q->where('price', '>=', (int) ($this->priceMin * 100));
+                }
+                if ($this->priceMax) {
+                    $q->where('price', '<=', (int) ($this->priceMax * 100));
+                }
+            });
+        }
+
+        $query = match ($this->sort) {
+            'price_asc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) ASC', ['product_variant']),
+            'price_desc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) DESC', ['product_variant']),
+            'name' => $query->orderByRaw("json_extract(attribute_data, '$.name.value.ka') ASC"),
+            default => $query->latest(),
+        };
+
+        return $query->paginate(20);
     }
 }

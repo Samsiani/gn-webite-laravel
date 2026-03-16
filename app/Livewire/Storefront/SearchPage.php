@@ -30,7 +30,10 @@ class SearchPage extends Component
 
         if (mb_strlen($this->query) >= 2) {
             if (config('scout.driver') === 'meilisearch') {
-                $products = Product::search($this->query)->paginate(24);
+                $products = Product::search($this->query)
+                    ->where('status', 'published')
+                    ->query(fn ($query) => $query->with(['variants.prices', 'urls.language', 'media']))
+                    ->paginate(24);
             } else {
                 $search = $this->query;
                 $table = (new Product)->getTable();
@@ -50,7 +53,6 @@ class SearchPage extends Component
             }
         }
 
-        // Root categories for nav
         $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
         $categories = $collectionGroup
             ? LunarCollection::where('collection_group_id', $collectionGroup->id)

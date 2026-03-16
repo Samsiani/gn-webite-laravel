@@ -26,25 +26,31 @@ class LiveSearch extends Component
         $results = collect();
 
         if (mb_strlen($this->query) >= 3) {
-            $search = $this->query;
-            $table = (new Product)->getTable();
-            $isMysql = config('database.default') === 'mysql';
+            if (config('scout.driver') === 'meilisearch') {
+                $results = Product::search($this->query)
+                    ->where('status', 'published')
+                    ->query(fn ($query) => $query->with(['variants.prices', 'urls.language', 'media']))
+                    ->take(6)
+                    ->get();
+            } else {
+                $search = $this->query;
+                $table = (new Product)->getTable();
+                $isMysql = config('database.default') === 'mysql';
+                $jsonFn = $isMysql
+                    ? "JSON_UNQUOTE(JSON_EXTRACT({$table}.attribute_data, '$.name.value.%s'))"
+                    : "json_extract({$table}.attribute_data, '$.name.value.%s')";
 
-            // MySQL needs JSON_UNQUOTE, SQLite handles it natively
-            $jsonFn = $isMysql
-                ? "JSON_UNQUOTE(JSON_EXTRACT({$table}.attribute_data, '$.name.value.%s'))"
-                : "json_extract({$table}.attribute_data, '$.name.value.%s')";
-
-            $results = Product::where('status', 'published')
-                ->where(function ($q) use ($search, $jsonFn) {
-                    $q->whereRaw(sprintf($jsonFn, 'ka') . ' LIKE ?', ['%' . $search . '%'])
-                      ->orWhereRaw(sprintf($jsonFn, 'en') . ' LIKE ?', ['%' . $search . '%'])
-                      ->orWhereRaw(sprintf($jsonFn, 'ru') . ' LIKE ?', ['%' . $search . '%'])
-                      ->orWhereHas('variants', fn ($vq) => $vq->where('sku', 'LIKE', '%' . $search . '%'));
-                })
-                ->with(['variants.prices', 'urls.language', 'media'])
-                ->limit(6)
-                ->get();
+                $results = Product::where('status', 'published')
+                    ->where(function ($q) use ($search, $jsonFn) {
+                        $q->whereRaw(sprintf($jsonFn, 'ka') . ' LIKE ?', ['%' . $search . '%'])
+                          ->orWhereRaw(sprintf($jsonFn, 'en') . ' LIKE ?', ['%' . $search . '%'])
+                          ->orWhereRaw(sprintf($jsonFn, 'ru') . ' LIKE ?', ['%' . $search . '%'])
+                          ->orWhereHas('variants', fn ($vq) => $vq->where('sku', 'LIKE', '%' . $search . '%'));
+                    })
+                    ->with(['variants.prices', 'urls.language', 'media'])
+                    ->limit(6)
+                    ->get();
+            }
         }
 
         return view('livewire.storefront.live-search', [
