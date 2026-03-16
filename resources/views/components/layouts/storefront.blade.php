@@ -17,6 +17,8 @@
             <link rel="alternate" hreflang="x-default" href="{{ $hreflangs['ka'] }}">
         @endif
     @endif
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -135,7 +137,7 @@
             {{-- Mobile header: logo | search | hamburger --}}
             <div class="flex lg:hidden items-center gap-2.5 h-14">
                 <a wire:navigate href="{{ $prefix ?? '' }}/" class="shrink-0">
-                    <img src="/images/logo.png" alt="GN Industrial" class="h-7 w-auto">
+                    <img src="/images/gn-mobile-logo.png" alt="GN Industrial" class="h-8 w-auto">
                 </a>
                 <div class="flex-1 min-w-0">
                     @livewire('storefront.live-search', [], key('mobile-search'))
