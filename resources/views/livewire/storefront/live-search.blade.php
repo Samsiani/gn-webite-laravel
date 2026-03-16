@@ -20,7 +20,7 @@
     </div>
 
     {{-- Loading --}}
-    <div wire:loading wire:target="query" class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 z-50 text-center">
+    <div wire:loading wire:target="query" class="lg:absolute lg:left-0 lg:right-0 lg:top-full lg:mt-1 fixed left-2 right-2 top-[60px] bg-white rounded-xl shadow-2xl border border-gray-100 p-4 z-50 text-center">
         <svg class="w-5 h-5 animate-spin mx-auto text-primary" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
     </div>
 
@@ -32,7 +32,7 @@
          x-transition:leave="transition ease-in duration-100"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+         class="lg:absolute lg:left-0 lg:right-0 lg:top-full lg:mt-1 fixed left-2 right-2 top-[60px] bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
 
         @if($results->isNotEmpty())
             <div class="max-h-[420px] overflow-y-auto divide-y divide-gray-50">
