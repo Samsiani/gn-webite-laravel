@@ -5,7 +5,6 @@ namespace App\Livewire\Storefront;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Lunar\Facades\CartSession;
-use Lunar\Models\ProductVariant;
 
 class CartManager extends Component
 {

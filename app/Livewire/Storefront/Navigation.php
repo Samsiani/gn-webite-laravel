@@ -3,7 +3,6 @@
 namespace App\Livewire\Storefront;
 
 use App\Models\Menu;
-use App\Models\Slide;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
