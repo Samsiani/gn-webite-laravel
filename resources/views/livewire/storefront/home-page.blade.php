@@ -14,7 +14,7 @@
              x-init="startAuto()"
              @mouseenter="stopAuto()" @mouseleave="startAuto()"
              @touchstart.passive="touchX = $event.touches[0].clientX; stopAuto()"
-             @touchend.passive="let diff = touchX - $event.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? next() : prev() } startAuto()"
+             @touchend.passive="let diff = touchX - $event.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? next() : prev() } startAuto()">
 
         @foreach($slides as $i => $s)
             @php
