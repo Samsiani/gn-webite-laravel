@@ -58,6 +58,11 @@ img {
     display: block;
 }
 
+/* ── Prevent mobile zoom on input focus ── */
+@media (max-width: 1023px) {
+    input, select, textarea { font-size: 16px !important; }
+}
+
 /* ── Form inputs — thin, light, breathable ── */
 input[type="text"],
 input[type="email"],
