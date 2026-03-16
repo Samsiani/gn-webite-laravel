@@ -12,14 +12,26 @@ class SetLocale
 
     public function handle(Request $request, Closure $next): Response
     {
+        // For Livewire/internal requests, read locale from session
+        $path = $request->path();
+        if (str_starts_with($path, 'livewire/') || str_starts_with($path, 'admin')) {
+            $locale = session('locale', 'ka');
+            app()->setLocale($locale);
+            return $next($request);
+        }
+
         $segments = $request->segments();
         $locale = $segments[0] ?? null;
 
         if (in_array($locale, ['en', 'ru'])) {
             app()->setLocale($locale);
         } else {
-            app()->setLocale('ka');
+            $locale = 'ka';
+            app()->setLocale($locale);
         }
+
+        // Persist locale in session for Livewire requests
+        session(['locale' => $locale]);
 
         return $next($request);
     }

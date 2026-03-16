@@ -158,7 +158,7 @@ class LunarSeeder extends Seeder
             [
                 'name' => ['ka' => 'შინაარსი', 'en' => 'Content', 'ru' => 'Содержание'],
                 'position' => 1,
-                'attributable_type' => \Lunar\Models\Product::class,
+                'attributable_type' => 'product',
             ]
         );
 
@@ -168,11 +168,11 @@ class LunarSeeder extends Seeder
 
         $this->createAttribute($contentGroup, 'description', 'Description', [
             'ka' => 'აღწერა', 'en' => 'Description', 'ru' => 'Описание',
-        ], 'Lunar\\FieldTypes\\TranslatedText', false, 2, 'richtext');
+        ], 'Lunar\\FieldTypes\\TranslatedText', false, 2, 'richtext', false, true);
 
         $this->createAttribute($contentGroup, 'short_description', 'Short Description', [
             'ka' => 'მოკლე აღწერა', 'en' => 'Short Description', 'ru' => 'Краткое описание',
-        ], 'Lunar\\FieldTypes\\TranslatedText', false, 3);
+        ], 'Lunar\\FieldTypes\\TranslatedText', false, 3, 'richtext', false, true);
 
         // General Specs attribute group
         $specsGroup = AttributeGroup::firstOrCreate(
@@ -180,7 +180,7 @@ class LunarSeeder extends Seeder
             [
                 'name' => ['ka' => 'ძირითადი მახასიათებლები', 'en' => 'General Specifications', 'ru' => 'Основные характеристики'],
                 'position' => 2,
-                'attributable_type' => \Lunar\Models\Product::class,
+                'attributable_type' => 'product',
             ]
         );
 
@@ -210,7 +210,7 @@ class LunarSeeder extends Seeder
             [
                 'name' => ['ka' => 'ტექნიკური დეტალები', 'en' => 'Technical Details', 'ru' => 'Технические детали'],
                 'position' => 3,
-                'attributable_type' => \Lunar\Models\Product::class,
+                'attributable_type' => 'product',
             ]
         );
 
@@ -240,7 +240,7 @@ class LunarSeeder extends Seeder
             [
                 'name' => ['ka' => 'SEO', 'en' => 'SEO', 'ru' => 'SEO'],
                 'position' => 4,
-                'attributable_type' => \Lunar\Models\Product::class,
+                'attributable_type' => 'product',
             ]
         );
 
@@ -252,8 +252,8 @@ class LunarSeeder extends Seeder
             'ka' => 'მეტა აღწერა', 'en' => 'Meta Description', 'ru' => 'Мета описание',
         ], 'Lunar\\FieldTypes\\TranslatedText', false, 2);
 
-        // Attach all attributes to the product type
-        $attributes = Attribute::all();
+        // Attach product attributes to the product type
+        $attributes = Attribute::where('attribute_type', 'product')->get();
         $productType->mappedAttributes()->sync($attributes->pluck('id'));
     }
 
@@ -267,6 +267,7 @@ class LunarSeeder extends Seeder
         int $position = 1,
         string $type = 'text',
         bool $filterable = false,
+        bool $richtext = false,
     ): void {
         $existing = Attribute::where('handle', $handle)
             ->where('attribute_group_id', $group->id)
@@ -274,6 +275,11 @@ class LunarSeeder extends Seeder
 
         if ($existing) {
             return;
+        }
+
+        $config = ['type' => $type];
+        if ($richtext) {
+            $config['richtext'] = true;
         }
 
         $attribute = new Attribute;
@@ -285,11 +291,11 @@ class LunarSeeder extends Seeder
         $attribute->section = null;
         $attribute->type = $fieldType;
         $attribute->required = $required;
-        $attribute->configuration = ['type' => $type];
+        $attribute->configuration = $config;
         $attribute->filterable = $filterable;
         $attribute->searchable = in_array($handle, ['name', 'description', 'brand']);
         $attribute->system = in_array($handle, ['name']);
-        $attribute->validation_rules = $required ? json_encode(['required' => 'true']) : null;
+        $attribute->validation_rules = null;
         $attribute->save();
     }
 

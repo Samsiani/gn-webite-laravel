@@ -1,5 +1,6 @@
 <?php
 
+use App\Media\ProductMediaDefinitions;
 use Lunar\Base\StandardMediaDefinitions;
 
 return [
@@ -8,7 +9,7 @@ return [
         'asset' => StandardMediaDefinitions::class,
         'brand' => StandardMediaDefinitions::class,
         'collection' => StandardMediaDefinitions::class,
-        'product' => StandardMediaDefinitions::class,
+        'product' => ProductMediaDefinitions::class,
         'product-option' => StandardMediaDefinitions::class,
         'product-option-value' => StandardMediaDefinitions::class,
     ],

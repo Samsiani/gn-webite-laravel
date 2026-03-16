@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,6 +13,11 @@ class LegacyRedirects
     public function handle(Request $request, Closure $next): Response
     {
         $path = $request->path();
+
+        // Skip internal routes
+        if (str_starts_with($path, 'livewire/') || str_starts_with($path, 'admin') || str_starts_with($path, 'filament/')) {
+            return $next($request);
+        }
 
         // Redirect /product-category/* → /category/*
         if (preg_match('#^(en/|ru/)?product-category/(.+?)/?$#', $path, $m)) {
@@ -24,14 +30,15 @@ class LegacyRedirects
             return redirect('/' . rtrim($path, '/'), 301);
         }
 
-        // Check redirect_map table for custom redirects
+        // Check cached redirect map (refreshes every hour)
         try {
-            $redirect = DB::table('redirect_map')
-                ->where('old_url', '/' . $path)
-                ->first();
+            $redirectMap = Cache::remember('redirect_map', 3600, function () {
+                return DB::table('redirect_map')->pluck('new_url', 'old_url')->toArray();
+            });
 
-            if ($redirect) {
-                return redirect($redirect->new_url, 301);
+            $lookupPath = '/' . $path;
+            if (isset($redirectMap[$lookupPath])) {
+                return redirect($redirectMap[$lookupPath], 301);
             }
         } catch (\Exception $e) {
             // Table may not exist yet

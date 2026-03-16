@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('status_code')->default(301);
             $table->timestamps();
 
-            $table->index('old_url');
         });
 
         Schema::create('wp_id_map', function (Blueprint $table) {

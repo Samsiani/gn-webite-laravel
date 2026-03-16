@@ -5,6 +5,7 @@ namespace App\Livewire\Storefront;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Lunar\Models\Collection as LunarCollection;
+use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 use Lunar\Models\Url;
 
@@ -14,28 +15,54 @@ class ProductListingPage extends Component
 
     public ?LunarCollection $collection = null;
     public string $sort = 'latest';
-    public string $search = '';
+    public ?float $priceMin = null;
+    public ?float $priceMax = null;
 
     public function mount(string $slug)
     {
         $locale = app()->getLocale();
         $languageId = \Lunar\Models\Language::where('code', $locale)->value('id');
 
+        // Try current locale first, then any language
         $url = Url::where('slug', $slug)
-            ->where('element_type', LunarCollection::class)
+            ->where('element_type', 'collection')
             ->when($languageId, fn ($q) => $q->where('language_id', $languageId))
             ->first();
+
+        if (! $url) {
+            $url = Url::where('slug', $slug)
+                ->where('element_type', 'collection')
+                ->first();
+        }
 
         if (! $url) {
             abort(404);
         }
 
-        $this->collection = LunarCollection::find($url->element_id);
+        $this->collection = LunarCollection::with(['urls.language'])->find($url->element_id);
+    }
+
+    public function updatedSort(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPriceMin(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPriceMax(): void
+    {
+        $this->resetPage();
     }
 
     public function render()
     {
-        $query = Product::where('status', 'published');
+        $locale = app()->getLocale();
+
+        $query = Product::where('status', 'published')
+            ->with(['variants.prices', 'urls.language', 'media']);
 
         if ($this->collection) {
             $collectionIds = $this->collection->descendants()->pluck('id')
@@ -46,10 +73,56 @@ class ProductListingPage extends Component
             });
         }
 
-        $products = $query->paginate(24);
+        // Price filter
+        if ($this->priceMin || $this->priceMax) {
+            $query->whereHas('variants.prices', function ($q) {
+                if ($this->priceMin) {
+                    $q->where('price', '>=', (int) ($this->priceMin * 100));
+                }
+                if ($this->priceMax) {
+                    $q->where('price', '<=', (int) ($this->priceMax * 100));
+                }
+            });
+        }
+
+        // Sorting
+        $query = match ($this->sort) {
+            'price_asc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) ASC', ['product_variant']),
+            'price_desc' => $query->orderByRaw('(SELECT MIN(price) FROM lunar_prices WHERE priceable_type = ? AND priceable_id IN (SELECT id FROM lunar_product_variants WHERE product_id = lunar_products.id)) DESC', ['product_variant']),
+            'name' => $query->orderByRaw("json_extract(attribute_data, '$.name.value.ka') ASC"),
+            default => $query->latest(),
+        };
+
+        $products = $query->paginate(20);
+
+        // Subcategories
+        $children = $this->collection
+            ? LunarCollection::where('parent_id', $this->collection->id)
+                ->with(['urls.language'])
+                ->get()
+            : collect();
+
+        // Root categories for nav
+        $collectionGroup = CollectionGroup::where('handle', 'product-categories')->first();
+        $categories = $collectionGroup
+            ? LunarCollection::where('collection_group_id', $collectionGroup->id)
+                ->whereIsRoot()
+                ->with(['urls.language'])
+                ->get()
+            : collect();
+
+        // Breadcrumbs
+        $breadcrumbs = collect();
+        if ($this->collection) {
+            $ancestors = $this->collection->ancestors()->with(['urls.language'])->get();
+            $breadcrumbs = $ancestors->push($this->collection);
+        }
 
         return view('livewire.storefront.product-listing-page', [
             'products' => $products,
-        ])->layout('components.layouts.storefront');
+            'children' => $children,
+            'categories' => $categories,
+            'breadcrumbs' => $breadcrumbs,
+        ])->layout('components.layouts.storefront', ['categories' => $categories]);
     }
 }

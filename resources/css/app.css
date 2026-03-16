@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -10,4 +11,141 @@
     --color-primary: #50529D;
     --color-primary-light: #7274C2;
     --color-primary-dark: #3a3c75;
+    --color-primary-50: #eef0ff;
+    --color-primary-100: #e1e3ff;
+    --color-accent: #d3a200;
+    --color-surface: #f8f8fa;
+}
+
+/* GN.ge custom styles */
+
+/* Global smooth transitions */
+a, button, input, select, textarea {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+img {
+    transition: opacity 0.3s ease;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-card {
+    transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.product-card:hover {
+    box-shadow: 0 8px 30px rgba(80, 82, 157, 0.15);
+    transform: translateY(-3px);
+}
+
+.specs-table tr {
+    transition: background-color 0.2s ease;
+}
+.specs-table tr:hover td {
+    background-color: #f0f1ff;
+}
+.specs-table tr:nth-child(even) td {
+    background-color: #f9fafb;
+}
+
+/* Mega menu hover */
+.mega-menu-item:hover > .mega-dropdown {
+    display: block;
+}
+
+/* ── Form inputs — thin, light, breathable ── */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+select,
+textarea {
+    border-width: 1px;
+    border-color: rgba(209, 213, 219, 0.55);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    background-color: #fafafa;
+}
+input::placeholder,
+textarea::placeholder {
+    color: #c4c8cf;
+    padding-left: 2px;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: rgba(80, 82, 157, 0.45);
+    background-color: #fff;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: none !important;
+}
+/* Error state */
+input.border-red-300, textarea.border-red-300 {
+    border-color: rgba(252, 165, 165, 0.6);
+    background-color: #fef8f8;
+}
+
+/* Smooth badge/tag animations */
+@keyframes badge-pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mini cart dropdown */
+[x-cloak] { display: none !important; }
+
+/* ── Skeleton shimmer ── */
+@keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 37%, #f0f0f0 63%);
+    background-size: 800px 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+}
+.skeleton-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* ── Lazy image fade-in ── */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+img[loading="lazy"].loaded,
+img:not([loading="lazy"]) {
+    opacity: 1;
+}
+
+/* ── Stagger fade-in on scroll ── */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Livewire loading states ── */
+[wire\:loading] {
+    transition: opacity 0.2s ease;
 }

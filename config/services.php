@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'woocommerce' => [
+        'url' => env('WC_URL', 'https://gn.ge'),
+        'key' => env('WC_KEY', ''),
+        'secret' => env('WC_SECRET', ''),
+    ],
+
 ];
