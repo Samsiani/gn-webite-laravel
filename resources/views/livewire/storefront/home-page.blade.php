@@ -24,7 +24,7 @@
             @endphp
 
             {{-- Background --}}
-            <div class="absolute inset-0 transition-opacity duration-[1500ms] pointer-events-none"
+            <div class="absolute inset-0 pointer-events-none" style="transition: opacity 1.5s cubic-bezier(0.4,0,0.2,1); will-change: opacity;"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
@@ -39,14 +39,15 @@
             </div>
 
             {{-- Content --}}
-            <div class="{{ $i === 0 ? 'relative' : 'absolute inset-0' }} flex items-center transition-all duration-[1200ms] pointer-events-none z-10"
+            <div class="{{ $i === 0 ? 'relative' : 'absolute inset-0' }} flex items-center pointer-events-none z-10"
+                 style="transition: opacity 1.2s cubic-bezier(0.4,0,0.2,1), transform 1.2s cubic-bezier(0.4,0,0.2,1);"
                  :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
                  {!! $i > 0 ? 'x-cloak' : '' !!}>
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @if($s->t('badge', $locale))
-                            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm mb-6">
+                            <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1.5 text-sm mb-6">
                                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                                 {{ $s->t('badge', $locale) }}
                             </div>
@@ -72,7 +73,7 @@
                         @if($s->show_stats && !empty($s->stats))
                         <div class="hidden lg:grid grid-cols-2 gap-4" :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @foreach($s->stats as $stat)
-                                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                                <div class="bg-white/10 rounded-2xl p-6">
                                     <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                     <div class="text-white/60 text-sm">
                                         @php
