@@ -52,20 +52,18 @@
                 @endif
             </div>
 
-            {{-- Content --}}
+            {{-- Content — outer wrapper is STATIC (no transform, no opacity transition) --}}
             <div class="absolute inset-0 flex items-center pointer-events-none z-10"
-                 style="transition: opacity 1.2s cubic-bezier(0.4,0,0.2,1), transform 1.2s cubic-bezier(0.4,0,0.2,1); will-change: opacity, transform;"
-                 :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+                 :class="slide === {{ $i }} ? 'visible' : 'invisible'">
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
+                        {{-- Text column — animates independently --}}
+                        <div style="transition: opacity 1s cubic-bezier(0.4,0,0.2,1) 0.1s, transform 1s cubic-bezier(0.4,0,0.2,1) 0.1s; will-change: opacity, transform;"
+                             :class="slide === {{ $i }} ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-5 pointer-events-none'">
                             @if($s->t('badge', $locale))
-                            <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm mb-6 relative overflow-hidden">
-                                <div class="absolute inset-0 bg-white/[0.08]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"></div>
-                                <div class="relative inline-flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                    {{ $s->t('badge', $locale) }}
-                                </div>
+                            <div class="inline-flex items-center gap-2 bg-white/[0.12] rounded-full px-4 py-1.5 text-sm mb-6">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                {{ $s->t('badge', $locale) }}
                             </div>
                             @endif
                             <h2 class="text-3xl md:text-5xl lg:text-[3.5rem] font-bold mb-5 leading-[1.15]">{{ $s->t('title', $locale) }}</h2>
@@ -86,14 +84,20 @@
                                 @endif
                             </div>
                         </div>
+                        {{-- Stats column — 3-layer sandwich per box --}}
                         @if($s->show_stats && !empty($s->stats))
-                        <div class="hidden lg:grid grid-cols-2 gap-4" :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
+                        <div class="hidden lg:grid grid-cols-2 gap-4">
                             @foreach($s->stats as $j => $stat)
-                                <div class="rounded-2xl p-6 relative overflow-hidden"
-                                     style="transition: transform 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s; will-change: transform;"
-                                     :class="slide === {{ $i }} ? 'translate-y-0' : 'translate-y-3'">
-                                    <div class="absolute inset-0 bg-white/[0.08]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"></div>
-                                    <div class="relative">
+                                <div class="rounded-2xl relative overflow-hidden"
+                                     :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
+                                    {{-- Layer 1: Blur background — fades only, NO transform --}}
+                                    <div class="absolute inset-0 rounded-2xl bg-white/[0.08]"
+                                         style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) {{ 0.1 + $j * 0.08 }}s; will-change: opacity;"
+                                         :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'"></div>
+                                    {{-- Layer 2: Content — moves + fades independently --}}
+                                    <div class="relative p-6"
+                                         style="transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s, transform 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s; will-change: opacity, transform;"
+                                         :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                         <div class="text-white/60 text-sm">
                                             @php
