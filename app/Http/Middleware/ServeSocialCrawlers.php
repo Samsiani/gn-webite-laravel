@@ -125,6 +125,14 @@ class ServeSocialCrawlers
             . '<meta name="twitter:image" content="' . e($image) . '">'
             . '</head><body></body></html>';
 
-        return response($html, 200)->header('Content-Type', 'text/html; charset=utf-8');
+        // Return raw response — bypass all remaining middleware (session, CSRF, cookies)
+        // This prevents Laravel from adding cache-control:no-cache,private and session cookies
+        // which trigger Cloudflare's JS challenge
+        header('HTTP/1.1 200 OK');
+        header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: public, max-age=3600');
+        header('X-Robots-Tag: all');
+        echo $html;
+        exit;
     }
 }
