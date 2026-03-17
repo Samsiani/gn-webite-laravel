@@ -127,7 +127,7 @@ class SlideResource extends Resource
                         ->label('Overlay')
                         ->placeholder('rgba(26,28,61,0.85)')
                         ->visible(fn (Forms\Get $get) => $get('bg_type') === 'image')
-                        ->helperText('Color overlay on image'),
+                        ->helperText('Type "transparent" or "none" for clean image without overlay'),
                 ]),
             ])->columnSpan(['lg' => 1]),
         ])->columns(3);

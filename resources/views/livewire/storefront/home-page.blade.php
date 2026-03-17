@@ -28,7 +28,9 @@
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
-                    <div class="absolute inset-0" style="background:linear-gradient(to right, {{ $s->overlay_color ?? 'rgba(26,28,61,0.88)' }} 0%, rgba(80,82,157,0.7) 100%)"></div>
+                    @if($s->overlay_color !== 'transparent' && $s->overlay_color !== 'none')
+                        <div class="absolute inset-0" style="background:linear-gradient(to right, {{ $s->overlay_color ?? 'rgba(26,28,61,0.88)' }} 0%, rgba(80,82,157,0.7) 100%)"></div>
+                    @endif
                 @else
                     <div class="absolute inset-0 bg-gradient-to-br {{ $s->bg_gradient ?? 'from-primary via-primary-dark to-[#2d2f5e]' }}"></div>
                     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
