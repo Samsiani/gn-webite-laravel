@@ -24,7 +24,7 @@
             @endphp
 
             {{-- Background --}}
-            <div class="absolute inset-0 transition-opacity duration-[1500ms]"
+            <div class="absolute inset-0 transition-opacity duration-[1500ms] pointer-events-none"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
