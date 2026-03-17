@@ -8,36 +8,33 @@ use Lunar\Models\Collection as LunarCollection;
 use Lunar\Models\CollectionGroup;
 use Lunar\Models\Product;
 use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\SitemapIndex;
 use Spatie\Sitemap\Tags\Url;
 
 class GenerateSitemap extends Command
 {
     protected $signature = 'sitemap:generate';
-    protected $description = 'Generate XML sitemap with products, categories, and blog posts in all languages';
+    protected $description = 'Generate sitemap index with sub-sitemaps for products, categories, blog, and pages';
 
     private array $languages = ['ka', 'en', 'ru'];
 
     public function handle(): int
     {
-        $this->info('Generating sitemap...');
-        $sitemap = Sitemap::create();
+        $this->info('Generating sitemaps...');
 
-        $this->addStaticPages($sitemap);
-        $this->addProducts($sitemap);
-        $this->addCategories($sitemap);
-        $this->addBlogPosts($sitemap);
+        $this->generatePagesSitemap();
+        $this->generateProductsSitemap();
+        $this->generateCategoriesSitemap();
+        $this->generateBlogSitemap();
+        $this->generateSitemapIndex();
 
-        $path = public_path('sitemap.xml');
-        $sitemap->writeToFile($path);
-
-        $count = substr_count(file_get_contents($path), '<url>');
-        $this->info("Sitemap generated: {$count} URLs → {$path}");
-
+        $this->info('All sitemaps generated.');
         return self::SUCCESS;
     }
 
-    private function addStaticPages(Sitemap $sitemap): void
+    private function generatePagesSitemap(): void
     {
+        $sitemap = Sitemap::create();
         $pages = ['/', '/shop', '/blog', '/contact'];
 
         foreach ($pages as $page) {
@@ -49,18 +46,20 @@ class GenerateSitemap extends Command
                 $prefix = $lang === 'ka' ? '' : '/' . $lang;
                 $url->addAlternate($this->url($prefix, $page), $lang);
             }
-
             $sitemap->add($url);
         }
+
+        $sitemap->writeToFile(public_path('pages-sitemap.xml'));
+        $this->info("  Pages: " . count($pages) . " URLs");
     }
 
-    private function addProducts(Sitemap $sitemap): void
+    private function generateProductsSitemap(): void
     {
         $products = Product::where('status', 'published')
             ->with(['urls.language'])
             ->get();
 
-        $this->info("  Products: {$products->count()}");
+        $sitemap = Sitemap::create();
 
         foreach ($products as $product) {
             $urls = [];
@@ -83,12 +82,14 @@ class GenerateSitemap extends Command
             foreach ($urls as $lang => $href) {
                 $url->addAlternate($href, $lang);
             }
-
             $sitemap->add($url);
         }
+
+        $sitemap->writeToFile(public_path('products-sitemap.xml'));
+        $this->info("  Products: {$products->count()} URLs");
     }
 
-    private function addCategories(Sitemap $sitemap): void
+    private function generateCategoriesSitemap(): void
     {
         $group = CollectionGroup::where('handle', 'product-categories')->first();
         if (! $group) return;
@@ -98,7 +99,7 @@ class GenerateSitemap extends Command
             ->with(['urls.language'])
             ->get();
 
-        $this->info("  Categories: {$collections->count()}");
+        $sitemap = Sitemap::create();
 
         foreach ($collections as $collection) {
             $urls = [];
@@ -121,16 +122,17 @@ class GenerateSitemap extends Command
             foreach ($urls as $lang => $href) {
                 $url->addAlternate($href, $lang);
             }
-
             $sitemap->add($url);
         }
+
+        $sitemap->writeToFile(public_path('categories-sitemap.xml'));
+        $this->info("  Categories: {$collections->count()} URLs");
     }
 
-    private function addBlogPosts(Sitemap $sitemap): void
+    private function generateBlogSitemap(): void
     {
         $posts = BlogPost::published()->get();
-
-        $this->info("  Blog posts: {$posts->count()}");
+        $sitemap = Sitemap::create();
 
         foreach ($posts as $post) {
             $urls = ['ka' => $this->url('', '/blog/' . $post->slug)];
@@ -145,9 +147,25 @@ class GenerateSitemap extends Command
             foreach ($urls as $lang => $href) {
                 $url->addAlternate($href, $lang);
             }
-
             $sitemap->add($url);
         }
+
+        $sitemap->writeToFile(public_path('blog-sitemap.xml'));
+        $this->info("  Blog: {$posts->count()} URLs");
+    }
+
+    private function generateSitemapIndex(): void
+    {
+        $baseUrl = rtrim(config('app.url'), '/');
+
+        SitemapIndex::create()
+            ->add("{$baseUrl}/pages-sitemap.xml")
+            ->add("{$baseUrl}/products-sitemap.xml")
+            ->add("{$baseUrl}/categories-sitemap.xml")
+            ->add("{$baseUrl}/blog-sitemap.xml")
+            ->writeToFile(public_path('sitemap.xml'));
+
+        $this->info("  Index: sitemap.xml → 4 sub-sitemaps");
     }
 
     private function url(string $prefix, string $path): string

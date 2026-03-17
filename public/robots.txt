@@ -14,3 +14,7 @@ User-agent: Googlebot
 Allow: /
 
 Sitemap: https://laravel.gn.ge/sitemap.xml
+Sitemap: https://laravel.gn.ge/products-sitemap.xml
+Sitemap: https://laravel.gn.ge/categories-sitemap.xml
+Sitemap: https://laravel.gn.ge/blog-sitemap.xml
+Sitemap: https://laravel.gn.ge/pages-sitemap.xml
