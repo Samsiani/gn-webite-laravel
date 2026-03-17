@@ -47,12 +47,12 @@ class BlogListPage extends Component
 
         $categories = StorefrontData::categories();
 
+        $blogTitle = $activeCategory ? $activeCategory->getTranslatedName(app()->getLocale()) : __('Blog');
+
         return view('livewire.storefront.blog-list-page', [
             'posts' => $posts,
             'blogCategories' => $blogCategories,
             'activeCategory' => $activeCategory,
-        $blogTitle = $activeCategory ? $activeCategory->getTranslatedName(app()->getLocale()) : __('Blog');
-
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($blogTitle),

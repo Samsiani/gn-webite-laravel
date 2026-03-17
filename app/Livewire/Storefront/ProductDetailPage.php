@@ -124,6 +124,12 @@ class ProductDetailPage extends Component
         $shortDescription = $this->product->translateAttribute('short_description', $locale)
             ?? $this->product->translateAttribute('short_description');
 
+        // SEO meta
+        $name = $this->product->translateAttribute('name', $locale) ?? $this->product->translateAttribute('name');
+        $desc = $this->product->translateAttribute('description', $locale) ?? $this->product->translateAttribute('description');
+        $metaDesc = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $desc), 160);
+        $ogImg = $this->product->getFirstMediaUrl('images', 'medium') ?: $this->product->getFirstMediaUrl('images');
+
         return view('livewire.storefront.product-detail-page', [
             'price' => $price,
             'comparePrice' => $comparePrice,
@@ -138,11 +144,6 @@ class ProductDetailPage extends Component
             'related' => $related,
             'images' => $images,
             'variant' => $variant,
-        $name = $this->product->translateAttribute('name', $locale) ?? $this->product->translateAttribute('name');
-        $desc = $this->product->translateAttribute('description', $locale) ?? $this->product->translateAttribute('description');
-        $metaDesc = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $desc), 160);
-        $ogImg = $this->product->getFirstMediaUrl('images', 'medium') ?: $this->product->getFirstMediaUrl('images');
-
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($name),

@@ -70,14 +70,14 @@ class ShopPage extends Component
 
         $hasFilters = $this->q || $this->categoryId || $this->priceMin || $this->priceMax;
 
-        return view('livewire.storefront.shop-page', [
-            'products' => $products,
-            'categories' => $categories,
-            'hasFilters' => $hasFilters,
         $shopTitle = $this->q
             ? __('Search') . ': "' . $this->q . '"'
             : __('Shop');
 
+        return view('livewire.storefront.shop-page', [
+            'products' => $products,
+            'categories' => $categories,
+            'hasFilters' => $hasFilters,
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($shopTitle),

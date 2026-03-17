@@ -112,16 +112,10 @@ class ProductListingPage extends Component
             $breadcrumbs = $ancestors->push($this->collection);
         }
 
-        return view('livewire.storefront.product-listing-page', [
-            'products' => $products,
-            'children' => $children,
-            'categories' => $categories,
-            'breadcrumbs' => $breadcrumbs,
+        // SEO meta
         $locale = app()->getLocale();
         $catName = $this->collection?->translateAttribute('name', $locale) ?? $this->collection?->translateAttribute('name') ?? __('Category');
         $catDesc = $this->collection?->translateAttribute('description', $locale) ?? '';
-
-        // Hreflangs for category
         $hreflangs = [];
         if ($this->collection) {
             foreach ($this->collection->urls as $url) {
@@ -132,6 +126,11 @@ class ProductListingPage extends Component
             }
         }
 
+        return view('livewire.storefront.product-listing-page', [
+            'products' => $products,
+            'children' => $children,
+            'categories' => $categories,
+            'breadcrumbs' => $breadcrumbs,
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($catName),
