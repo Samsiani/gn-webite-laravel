@@ -3,7 +3,7 @@
     {{-- Hero Slider (database-driven) --}}
     @php $slides = \App\Models\Slide::active()->with('media')->get(); @endphp
     @if($slides->isNotEmpty())
-    <section class="relative text-white overflow-hidden bg-primary-dark min-h-[420px] md:min-h-[520px]"
+    <section class="relative text-white overflow-hidden bg-primary-dark min-h-[600px]"
              x-data="{
                 slide: 0, auto: null, total: {{ $slides->count() }}, touchX: 0,
                 next() { this.slide = (this.slide + 1) % this.total },
@@ -38,7 +38,8 @@
             @endphp
 
             {{-- Background --}}
-            <div class="absolute inset-0 pointer-events-none" style="transition: opacity 1.5s cubic-bezier(0.4,0,0.2,1); will-change: opacity;"
+            <div class="absolute inset-0 pointer-events-none"
+                 :style="slide === {{ $i }} ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) 500ms; will-change: opacity;' : 'transition: opacity 500ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity;'"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
@@ -52,13 +53,16 @@
                 @endif
             </div>
 
-            {{-- Content — outer wrapper is STATIC (no transform, no opacity transition) --}}
+            {{-- Content — outer wrapper is STATIC, stays visible during exit --}}
             <div class="absolute inset-0 flex items-center pointer-events-none z-10"
-                 :class="slide === {{ $i }} ? 'visible' : 'invisible'">
+                 :style="slide === {{ $i }} ? '' : 'transition: visibility 0s linear 600ms; visibility: hidden;'"
+                 :class="slide === {{ $i }} ? 'visible' : ''"
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {{-- Text column — animates independently --}}
-                        <div style="transition: opacity 1s cubic-bezier(0.4,0,0.2,1) 0.1s, transform 1s cubic-bezier(0.4,0,0.2,1) 0.1s; will-change: opacity, transform;"
+                        {{-- Text column — sequential: exit 0ms delay, enter 550ms delay --}}
+                        <div :style="slide === {{ $i }}
+                                 ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) 550ms, transform 600ms cubic-bezier(0.4,0,0.2,1) 550ms; will-change: opacity, transform;'
+                                 : 'transition: opacity 400ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 400ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity, transform;'"
                              :class="slide === {{ $i }} ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-5 pointer-events-none'">
                             @if($s->t('badge', $locale))
                             <div class="inline-flex items-center gap-2 bg-white/[0.12] rounded-full px-4 py-1.5 text-sm mb-6">
@@ -92,11 +96,16 @@
                                      :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                                     {{-- Layer 1: Blur background — fades only, NO transform --}}
                                     <div class="absolute inset-0 rounded-2xl bg-white/[0.08]"
-                                         style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) {{ 0.1 + $j * 0.08 }}s; will-change: opacity;"
+                                         style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);"
+                                         :style="slide === {{ $i }}
+                                             ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) {{ 500 + $j * 80 }}ms; will-change: opacity;'
+                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity;'"
                                          :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'"></div>
                                     {{-- Layer 2: Content — moves + fades independently --}}
                                     <div class="relative p-6"
-                                         style="transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s, transform 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s; will-change: opacity, transform;"
+                                         :style="slide === {{ $i }}
+                                             ? 'transition: opacity 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms, transform 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms; will-change: opacity, transform;'
+                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 350ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity, transform;'"
                                          :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                         <div class="text-white/60 text-sm">
