@@ -41,6 +41,9 @@ class CartPage extends Component
         return view('livewire.storefront.cart-page', [
             'cart' => $cart,
             'lines' => $lines,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title(__('Cart')),
+        ]);
     }
 }

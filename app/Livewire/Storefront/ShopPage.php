@@ -74,7 +74,17 @@ class ShopPage extends Component
             'products' => $products,
             'categories' => $categories,
             'hasFilters' => $hasFilters,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        $shopTitle = $this->q
+            ? __('Search') . ': "' . $this->q . '"'
+            : __('Shop');
+
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title($shopTitle),
+            'metaDescription' => __('Browse our catalog of professional kitchen equipment. :count products available.', ['count' => $products->total()]),
+            'canonical' => url(app()->getLocale() === 'ka' ? '/shop' : '/' . app()->getLocale() . '/shop'),
+            'hreflangs' => ['ka' => url('/shop'), 'en' => url('/en/shop'), 'ru' => url('/ru/shop')],
+        ]);
     }
 
     private function searchWithMeilisearch()

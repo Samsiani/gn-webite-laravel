@@ -138,6 +138,19 @@ class ProductDetailPage extends Component
             'related' => $related,
             'images' => $images,
             'variant' => $variant,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        $name = $this->product->translateAttribute('name', $locale) ?? $this->product->translateAttribute('name');
+        $desc = $this->product->translateAttribute('description', $locale) ?? $this->product->translateAttribute('description');
+        $metaDesc = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $desc), 160);
+        $ogImg = $this->product->getFirstMediaUrl('images', 'medium') ?: $this->product->getFirstMediaUrl('images');
+
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title($name),
+            'metaDescription' => $metaDesc ?: \App\Services\SeoHelper::defaultDescription(),
+            'canonical' => url()->current(),
+            'hreflangs' => $hreflangs,
+            'ogType' => 'product',
+            'ogImage' => $ogImg ?: null,
+        ]);
     }
 }

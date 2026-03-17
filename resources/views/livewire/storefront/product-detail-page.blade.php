@@ -222,8 +222,23 @@
                 'priceCurrency' => 'GEL',
                 'availability' => 'https://schema.org/' . ($variant && $variant->stock > 0 ? 'InStock' : 'OutOfStock'),
                 'url' => url()->current(),
+                'seller' => ['@type' => 'Organization', 'name' => 'GN Industrial'],
             ];
         }
+
+        // BreadcrumbList schema
+        $bcItems = [['@type' => 'ListItem', 'position' => 1, 'name' => __('Home'), 'item' => url('/')]];
+        $pos = 2;
+        if (isset($breadcrumbs)) {
+            foreach ($breadcrumbs as $bc) {
+                $bcName = $bc->translateAttribute('name', $locale) ?? $bc->translateAttribute('name');
+                $bcUrl = $bc->urls->first(fn ($u) => $u->language?->code === $locale) ?? $bc->urls->first();
+                $bcItems[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $bcName, 'item' => url(($locale === 'ka' ? '' : "/{$locale}") . '/category/' . ($bcUrl?->slug ?? ''))];
+            }
+        }
+        $bcItems[] = ['@type' => 'ListItem', 'position' => $pos, 'name' => $name];
+        $bcSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $bcItems];
     @endphp
-    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}</script>
+    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($bcSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 </div>

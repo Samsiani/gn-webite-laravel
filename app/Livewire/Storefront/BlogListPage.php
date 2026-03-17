@@ -51,6 +51,14 @@ class BlogListPage extends Component
             'posts' => $posts,
             'blogCategories' => $blogCategories,
             'activeCategory' => $activeCategory,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        $blogTitle = $activeCategory ? $activeCategory->getTranslatedName(app()->getLocale()) : __('Blog');
+
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title($blogTitle),
+            'metaDescription' => __('Articles and guides about professional kitchen equipment, restaurant technology, and food industry trends.'),
+            'canonical' => url(app()->getLocale() === 'ka' ? '/blog' : '/' . app()->getLocale() . '/blog'),
+            'hreflangs' => ['ka' => url('/blog'), 'en' => url('/en/blog'), 'ru' => url('/ru/blog')],
+        ]);
     }
 }

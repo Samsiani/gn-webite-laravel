@@ -44,6 +44,12 @@ class HomePage extends Component
             'onSale' => $onSale,
             'popular' => $popular,
             'blogPosts' => $blogPosts,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title(__('Professional Kitchen Equipment')),
+            'metaDescription' => __('Professional kitchen equipment for restaurants, hotels, and food industry. Authorized dealer in Georgia.'),
+            'canonical' => url('/'),
+            'hreflangs' => ['ka' => url('/'), 'en' => url('/en'), 'ru' => url('/ru')],
+        ]);
     }
 }

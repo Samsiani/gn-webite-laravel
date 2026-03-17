@@ -97,6 +97,12 @@ class ContactPage extends Component
         $categories = StorefrontData::categories();
 
         return view('livewire.storefront.contact-page')
-            ->layout('components.layouts.storefront', ['categories' => $categories]);
+            ->layout('components.layouts.storefront', [
+                'categories' => $categories,
+                'metaTitle' => \App\Services\SeoHelper::title(__('Contact Us')),
+                'metaDescription' => __('Contact GN Industrial. Phone: +995 593 73 76 73, Email: info@gn.ge, Address: Kaishi St #15, Tbilisi.'),
+                'canonical' => url(app()->getLocale() === 'ka' ? '/contact' : '/' . app()->getLocale() . '/contact'),
+                'hreflangs' => ['ka' => url('/contact'), 'en' => url('/en/contact'), 'ru' => url('/ru/contact')],
+            ]);
     }
 }

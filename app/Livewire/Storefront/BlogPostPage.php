@@ -56,11 +56,16 @@ class BlogPostPage extends Component
             'recentPosts' => $recentPosts,
             'hreflangs' => $hreflangs,
             'locale' => $locale,
+        $blogImage = $this->post->getFirstMediaUrl('featured', 'large') ?: $this->post->getFirstMediaUrl('featured');
+
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
-            'metaTitle' => $this->post->t('meta_title') ?: $this->post->t('title'),
+            'metaTitle' => \App\Services\SeoHelper::title($this->post->t('meta_title') ?: $this->post->t('title')),
             'metaDescription' => $this->post->t('meta_description') ?: \Illuminate\Support\Str::limit(strip_tags($this->post->t('excerpt')), 160),
+            'canonical' => url()->current(),
             'hreflangs' => $hreflangs,
+            'ogType' => 'article',
+            'ogImage' => $blogImage ?: null,
         ]);
     }
 }

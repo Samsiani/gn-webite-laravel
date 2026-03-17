@@ -117,6 +117,27 @@ class ProductListingPage extends Component
             'children' => $children,
             'categories' => $categories,
             'breadcrumbs' => $breadcrumbs,
-        ])->layout('components.layouts.storefront', ['categories' => $categories]);
+        $locale = app()->getLocale();
+        $catName = $this->collection?->translateAttribute('name', $locale) ?? $this->collection?->translateAttribute('name') ?? __('Category');
+        $catDesc = $this->collection?->translateAttribute('description', $locale) ?? '';
+
+        // Hreflangs for category
+        $hreflangs = [];
+        if ($this->collection) {
+            foreach ($this->collection->urls as $url) {
+                $lang = $url->language?->code;
+                if (! $lang) continue;
+                $langPrefix = $lang === 'ka' ? '' : "/{$lang}";
+                $hreflangs[$lang] = url("{$langPrefix}/category/{$url->slug}");
+            }
+        }
+
+        ])->layout('components.layouts.storefront', [
+            'categories' => $categories,
+            'metaTitle' => \App\Services\SeoHelper::title($catName),
+            'metaDescription' => \Illuminate\Support\Str::limit(strip_tags($catDesc), 160) ?: __(':category — professional kitchen equipment', ['category' => $catName]),
+            'canonical' => url()->current(),
+            'hreflangs' => $hreflangs,
+        ]);
     }
 }
