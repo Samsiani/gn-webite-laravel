@@ -5,30 +5,22 @@
     @if($slides->isNotEmpty())
     <section class="relative text-white overflow-hidden bg-primary-dark min-h-[600px]"
              x-data="{
-                slide: 0, auto: null, total: {{ $slides->count() }}, touchX: 0,
-                next() { this.slide = (this.slide + 1) % this.total },
-                prev() { this.slide = (this.slide - 1 + this.total) % this.total },
-                startAuto() { this.auto = setInterval(() => this.next(), 8000) },
-                stopAuto() { clearInterval(this.auto) }
+                slide: 0, auto: null, total: {{ $slides->count() }}, touchX: 0, locked: false,
+                go(n) {
+                    if (this.locked || n === this.slide) return;
+                    this.locked = true;
+                    this.slide = n;
+                    setTimeout(() => this.locked = false, 1200);
+                },
+                next() { this.go((this.slide + 1) % this.total) },
+                prev() { this.go((this.slide - 1 + this.total) % this.total) },
+                startAuto() { clearInterval(this.auto); this.auto = setInterval(() => this.next(), 8000) },
+                stopAuto() { clearInterval(this.auto); this.auto = null; }
              }"
              x-init="startAuto()"
              @mouseenter="stopAuto()" @mouseleave="startAuto()"
              @touchstart.passive="touchX = $event.touches[0].clientX; stopAuto()"
              @touchend.passive="let diff = touchX - $event.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? next() : prev() } startAuto()">
-
-        {{-- Height spacer — invisible, sets stable height from first slide's padding --}}
-        <div class="invisible py-20 md:py-28" aria-hidden="true">
-            <div class="max-w-[1400px] mx-auto px-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <div class="text-sm mb-6">&nbsp;</div>
-                        <div class="text-3xl md:text-5xl lg:text-[3.5rem] font-bold mb-5 leading-[1.15]">&nbsp;<br>&nbsp;</div>
-                        <div class="text-lg mb-8">&nbsp;<br>&nbsp;</div>
-                        <div class="py-3.5">&nbsp;</div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @foreach($slides as $i => $s)
             @php
@@ -37,9 +29,8 @@
                 $cta2Url = $s->cta2_url ?: null;
             @endphp
 
-            {{-- Background --}}
-            <div class="absolute inset-0 pointer-events-none"
-                 :style="slide === {{ $i }} ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) 500ms; will-change: opacity;' : 'transition: opacity 500ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity;'"
+            {{-- Background — simple crossfade --}}
+            <div class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
@@ -53,17 +44,13 @@
                 @endif
             </div>
 
-            {{-- Content — outer wrapper is STATIC, stays visible during exit --}}
-            <div class="absolute inset-0 flex items-center pointer-events-none z-10"
-                 :style="slide === {{ $i }} ? '' : 'transition: visibility 0s linear 600ms; visibility: hidden;'"
-                 :class="slide === {{ $i }} ? 'visible' : ''">
+            {{-- Content — static wrapper, inner elements fade --}}
+            <div class="absolute inset-0 flex items-center pointer-events-none z-10">
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {{-- Text column — exit: fade only, enter: fade + slide up --}}
-                        <div :style="slide === {{ $i }}
-                                 ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) 550ms, transform 600ms cubic-bezier(0.4,0,0.2,1) 550ms; will-change: opacity, transform;'
-                                 : 'transition: opacity 400ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 0ms linear 400ms; will-change: opacity;'"
-                             :class="slide === {{ $i }} ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-5 pointer-events-none'">
+                        {{-- Text column --}}
+                        <div class="transition-opacity duration-700 ease-in-out"
+                             :class="slide === {{ $i }} ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'">
                             @if($s->t('badge', $locale))
                             <div class="inline-flex items-center gap-2 bg-white/[0.12] rounded-full px-4 py-1.5 text-sm mb-6">
                                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -88,25 +75,17 @@
                                 @endif
                             </div>
                         </div>
-                        {{-- Stats column — 3-layer sandwich per box --}}
+                        {{-- Stats column --}}
                         @if($s->show_stats && !empty($s->stats))
                         <div class="hidden lg:grid grid-cols-2 gap-4">
                             @foreach($s->stats as $j => $stat)
                                 <div class="rounded-2xl relative overflow-hidden"
                                      :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
-                                    {{-- Layer 1: Blur background — fades only, NO transform --}}
-                                    <div class="absolute inset-0 rounded-2xl bg-white/[0.08]"
+                                    <div class="absolute inset-0 rounded-2xl bg-white/[0.08] transition-opacity duration-700 ease-in-out"
                                          style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);"
-                                         :style="slide === {{ $i }}
-                                             ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) {{ 500 + $j * 80 }}ms; will-change: opacity;'
-                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity;'"
                                          :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'"></div>
-                                    {{-- Layer 2: Content — moves + fades independently --}}
-                                    <div class="relative p-6"
-                                         :style="slide === {{ $i }}
-                                             ? 'transition: opacity 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms, transform 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms; will-change: opacity, transform;'
-                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 0ms linear 350ms; will-change: opacity;'"
-                                         :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
+                                    <div class="relative p-6 transition-opacity duration-700 ease-in-out"
+                                         :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                         <div class="text-white/60 text-sm">
                                             @php
@@ -130,7 +109,7 @@
         @if($slides->count() > 1)
         <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             @for($i = 0; $i < $slides->count(); $i++)
-                <button @click="slide = {{ $i }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
+                <button @click="go({{ $i }}); startAuto()"
                         aria-label="Slide {{ $i + 1 }}"
                         class="h-6 w-6 rounded-full transition-all duration-500 flex items-center justify-center"
                         :class="slide === {{ $i }} ? 'bg-white/20' : 'bg-transparent'">
@@ -141,12 +120,12 @@
         </div>
 
         {{-- Arrows --}}
-        <button @click="slide = (slide + {{ $slides->count() - 1 }}) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
+        <button @click="prev(); startAuto()"
                 aria-label="{{ __('Previous Slide') }}"
                 class="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button @click="slide = (slide + 1) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
+        <button @click="next(); startAuto()"
                 aria-label="{{ __('Next Slide') }}"
                 class="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
