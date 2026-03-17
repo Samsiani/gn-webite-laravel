@@ -47,9 +47,12 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @if($s->t('badge', $locale))
-                            <div class="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1.5 text-sm mb-6">
-                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                {{ $s->t('badge', $locale) }}
+                            <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm mb-6 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-white/[0.08]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"></div>
+                                <div class="relative inline-flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                    {{ $s->t('badge', $locale) }}
+                                </div>
                             </div>
                             @endif
                             <h2 class="text-3xl md:text-5xl lg:text-[3.5rem] font-bold mb-5 leading-[1.15]">{{ $s->t('title', $locale) }}</h2>
@@ -72,16 +75,21 @@
                         </div>
                         @if($s->show_stats && !empty($s->stats))
                         <div class="hidden lg:grid grid-cols-2 gap-4" :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
-                            @foreach($s->stats as $stat)
-                                <div class="bg-white/10 rounded-2xl p-6">
-                                    <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
-                                    <div class="text-white/60 text-sm">
-                                        @php
-                                            $statLabel = $stat['label'] ?? '';
-                                            if ($locale === 'en' && !empty($stat['label_en'])) $statLabel = $stat['label_en'];
-                                            if ($locale === 'ru' && !empty($stat['label_ru'])) $statLabel = $stat['label_ru'];
-                                        @endphp
-                                        {{ $statLabel }}
+                            @foreach($s->stats as $j => $stat)
+                                <div class="rounded-2xl p-6 relative overflow-hidden"
+                                     style="transition: opacity 0.8s ease {{ 0.15 + $j * 0.1 }}s, transform 0.8s ease {{ 0.15 + $j * 0.1 }}s;"
+                                     :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
+                                    <div class="absolute inset-0 bg-white/[0.08]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"></div>
+                                    <div class="relative">
+                                        <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
+                                        <div class="text-white/60 text-sm">
+                                            @php
+                                                $statLabel = $stat['label'] ?? '';
+                                                if ($locale === 'en' && !empty($stat['label_en'])) $statLabel = $stat['label_en'];
+                                                if ($locale === 'ru' && !empty($stat['label_ru'])) $statLabel = $stat['label_ru'];
+                                            @endphp
+                                            {{ $statLabel }}
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
