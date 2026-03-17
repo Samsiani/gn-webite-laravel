@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(prepend: [
+            \App\Http\Middleware\ServeSocialCrawlers::class,
             \App\Http\Middleware\LegacyRedirects::class,
             \App\Http\Middleware\SetLocale::class,
         ]);
