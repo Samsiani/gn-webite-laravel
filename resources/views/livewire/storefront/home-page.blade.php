@@ -59,10 +59,10 @@
                  :class="slide === {{ $i }} ? 'visible' : ''">
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {{-- Text column — sequential: exit 0ms delay, enter 550ms delay --}}
+                        {{-- Text column — exit: fade only, enter: fade + slide up --}}
                         <div :style="slide === {{ $i }}
                                  ? 'transition: opacity 600ms cubic-bezier(0.4,0,0.2,1) 550ms, transform 600ms cubic-bezier(0.4,0,0.2,1) 550ms; will-change: opacity, transform;'
-                                 : 'transition: opacity 400ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 400ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity, transform;'"
+                                 : 'transition: opacity 400ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 0ms linear 400ms; will-change: opacity;'"
                              :class="slide === {{ $i }} ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-5 pointer-events-none'">
                             @if($s->t('badge', $locale))
                             <div class="inline-flex items-center gap-2 bg-white/[0.12] rounded-full px-4 py-1.5 text-sm mb-6">
@@ -105,7 +105,7 @@
                                     <div class="relative p-6"
                                          :style="slide === {{ $i }}
                                              ? 'transition: opacity 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms, transform 500ms cubic-bezier(0.4,0,0.2,1) {{ 600 + $j * 100 }}ms; will-change: opacity, transform;'
-                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 350ms cubic-bezier(0.4,0,0.2,1) 0ms; will-change: opacity, transform;'"
+                                             : 'transition: opacity 350ms cubic-bezier(0.4,0,0.2,1) 0ms, transform 0ms linear 350ms; will-change: opacity;'"
                                          :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                         <div class="text-white/60 text-sm">
