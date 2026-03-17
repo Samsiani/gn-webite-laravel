@@ -206,14 +206,23 @@
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => $name,
+            'url' => url()->current(),
             'sku' => $sku,
             'brand' => ['@type' => 'Brand', 'name' => $product->translateAttribute('brand') ?: 'GN Industrial'],
+            'category' => $collection?->translateAttribute('name', $locale) ?? $collection?->translateAttribute('name') ?? '',
+            'itemCondition' => 'https://schema.org/NewCondition',
         ];
         if ($images->isNotEmpty()) {
             $schema['image'] = $images->map(fn($i) => $i->getUrl())->toArray();
         }
         if ($description) {
-            $schema['description'] = \Illuminate\Support\Str::limit(strip_tags($description), 300);
+            $schema['description'] = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $description), 300);
+        }
+        // Specs as additionalProperty
+        if (!empty($specs)) {
+            $schema['additionalProperty'] = collect($specs)->map(fn($s) => [
+                '@type' => 'PropertyValue', 'name' => $s['label'], 'value' => $s['value'],
+            ])->values()->toArray();
         }
         if ($price) {
             $schema['offers'] = [
@@ -223,10 +232,11 @@
                 'availability' => 'https://schema.org/' . ($variant && $variant->stock > 0 ? 'InStock' : 'OutOfStock'),
                 'url' => url()->current(),
                 'seller' => ['@type' => 'Organization', 'name' => 'GN Industrial'],
+                'priceValidUntil' => now()->addYear()->format('Y-m-d'),
             ];
         }
 
-        // BreadcrumbList schema
+        // BreadcrumbList
         $bcItems = [['@type' => 'ListItem', 'position' => 1, 'name' => __('Home'), 'item' => url('/')]];
         $pos = 2;
         if (isset($breadcrumbs)) {

@@ -126,12 +126,34 @@
             '@context' => 'https://schema.org',
             '@type' => 'Article',
             'headline' => $title,
+            'url' => url()->current(),
             'datePublished' => $post->published_at->toIso8601String(),
             'dateModified' => $post->updated_at->toIso8601String(),
-            'author' => ['@type' => 'Organization', 'name' => 'GN Industrial'],
+            'author' => ['@type' => 'Organization', 'name' => 'GN Industrial', 'url' => url('/')],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'GN Industrial',
+                'logo' => ['@type' => 'ImageObject', 'url' => url('/images/logo.png')],
+            ],
+            'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url()->current()],
         ];
         if ($image) $schema['image'] = $image;
         if ($excerpt) $schema['description'] = \Illuminate\Support\Str::limit(strip_tags($excerpt), 300);
+        if ($post->category) $schema['articleSection'] = $post->category->getTranslatedName($locale);
+
+        // BreadcrumbList
+        $bcItems = [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => __('Home'), 'item' => url('/')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('Blog'), 'item' => url($prefix . '/blog')],
+        ];
+        if ($post->category && mb_strtolower($post->category->getTranslatedName($locale)) !== mb_strtolower(__('Blog'))) {
+            $bcItems[] = ['@type' => 'ListItem', 'position' => 3, 'name' => $post->category->getTranslatedName($locale), 'item' => url($prefix . '/blog/category/' . $post->category->getTranslatedSlug($locale))];
+            $bcItems[] = ['@type' => 'ListItem', 'position' => 4, 'name' => $title];
+        } else {
+            $bcItems[] = ['@type' => 'ListItem', 'position' => 3, 'name' => $title];
+        }
+        $bcSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $bcItems];
     @endphp
     <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($bcSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 </div>

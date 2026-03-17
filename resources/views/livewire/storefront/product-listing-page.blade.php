@@ -136,4 +136,38 @@
             </div>
         </div>
     </div>
+
+    {{-- Schema.org --}}
+    @if(isset($collection) && $collection)
+    @php
+        $catName = $collection->translateAttribute('name', $locale) ?? $collection->translateAttribute('name');
+        $catDesc = $collection->translateAttribute('description', $locale) ?? '';
+
+        $collectionSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $catName,
+            'url' => url()->current(),
+        ];
+        if ($catDesc) $collectionSchema['description'] = \Illuminate\Support\Str::limit(strip_tags($catDesc), 300);
+        $catImage = $collection->getFirstMediaUrl('images', 'thumb') ?: $collection->getFirstMediaUrl('images');
+        if ($catImage) $collectionSchema['image'] = $catImage;
+
+        // BreadcrumbList
+        $bcItems = [['@type' => 'ListItem', 'position' => 1, 'name' => __('Home'), 'item' => url('/')]];
+        $pos = 2;
+        foreach ($breadcrumbs as $bc) {
+            $bcName = $bc->translateAttribute('name', $locale) ?? $bc->translateAttribute('name');
+            $bcUrl = $bc->urls->first(fn ($u) => $u->language?->code === $locale) ?? $bc->urls->first();
+            if ($bc->id === $collection->id) {
+                $bcItems[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $bcName];
+            } else {
+                $bcItems[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $bcName, 'item' => url(($locale === 'ka' ? '' : "/{$locale}") . '/category/' . ($bcUrl?->slug ?? ''))];
+            }
+        }
+        $bcSchema = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $bcItems];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($collectionSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($bcSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
 </div>

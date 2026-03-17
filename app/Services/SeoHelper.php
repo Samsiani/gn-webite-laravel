@@ -83,6 +83,17 @@ class SeoHelper
             ];
         }
 
+        // Social profiles
+        $socials = array_filter([
+            $settings['schema_facebook'] ?? 'https://www.facebook.com/gn.ge.official',
+            $settings['schema_instagram'] ?? '',
+            $settings['schema_youtube'] ?? '',
+            $settings['schema_tiktok'] ?? '',
+        ]);
+        if ($socials) {
+            $org['sameAs'] = array_values($socials);
+        }
+
         $schemas[] = $org;
 
         // WebSite with SearchAction
