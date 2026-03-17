@@ -20,7 +20,7 @@ git add -A && git commit -m "message" && git push origin main
 
 ### Via SSH (server-only operations)
 Connect: `ssh root@145.223.98.72` (password in memory)
-PHP path: `/usr/local/lsws/lsphp83/bin/php`
+PHP path: `/usr/local/lsws/lsphp84/bin/php`
 Web root: `/home/laravel.gn.ge/public_html`
 
 Use for:
@@ -45,7 +45,7 @@ Use for:
 
 ## Server Stack
 - AlmaLinux + CyberPanel + OpenLiteSpeed
-- PHP 8.3 at `/usr/local/lsws/lsphp83/bin/php`
+- PHP 8.4 at `/usr/local/lsws/lsphp84/bin/php`
 - MySQL (`gn_laravel` database)
 - Redis (sessions + cache)
 - Meilisearch v1.6.2 on `127.0.0.1:7700` (systemd service)

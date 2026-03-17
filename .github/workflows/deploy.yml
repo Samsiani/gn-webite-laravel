@@ -17,8 +17,8 @@ jobs:
           script: |
             cd /home/laravel.gn.ge/public_html
             git pull origin main
-            /usr/local/lsws/lsphp83/bin/php artisan optimize:clear
-            /usr/local/lsws/lsphp83/bin/php artisan route:cache
-            /usr/local/lsws/lsphp83/bin/php artisan view:cache
+            /usr/local/lsws/lsphp84/bin/php artisan optimize:clear
+            /usr/local/lsws/lsphp84/bin/php artisan route:cache
+            /usr/local/lsws/lsphp84/bin/php artisan view:cache
             npm run build
             echo "Deployed at $(date)"
