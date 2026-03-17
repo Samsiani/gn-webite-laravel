@@ -219,10 +219,11 @@
             $schema['description'] = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $description), 300);
         }
         // Specs as additionalProperty
-        if (!empty($specs)) {
-            $schema['additionalProperty'] = collect($specs)->map(fn($s) => [
+        if (!empty($specs) && is_array($specs)) {
+            $specProps = collect($specs)->filter(fn($s) => is_array($s) && isset($s['label'], $s['value']))->map(fn($s) => [
                 '@type' => 'PropertyValue', 'name' => $s['label'], 'value' => $s['value'],
             ])->values()->toArray();
+            if ($specProps) $schema['additionalProperty'] = $specProps;
         }
         if ($price) {
             $schema['offers'] = [
