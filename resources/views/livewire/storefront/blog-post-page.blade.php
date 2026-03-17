@@ -12,7 +12,7 @@
             <a wire:navigate href="{{ $prefix }}/" class="hover:text-primary transition">{{ __('Home') }}</a>
             <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             <a wire:navigate href="{{ $prefix }}/blog" class="hover:text-primary transition">{{ __('Blog') }}</a>
-            @if($post->category)
+            @if($post->category && mb_strtolower($post->category->getTranslatedName($locale)) !== mb_strtolower(__('Blog')))
                 <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 <a wire:navigate href="{{ $prefix }}/blog/category/{{ $post->category->getTranslatedSlug($locale) }}" class="hover:text-primary transition">
                     {{ $post->category->getTranslatedName($locale) }}
