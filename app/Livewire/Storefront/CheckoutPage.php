@@ -178,7 +178,7 @@ class CheckoutPage extends Component
         $user = Auth::guard('web')->user();
         if (! $user) return $this->cachedCustomer = null;
 
-        return $this->cachedCustomer = $this->getCustomer();
+        return $this->cachedCustomer = $user->customers()->first();
     }
 
     private function resetModalFields(): void
