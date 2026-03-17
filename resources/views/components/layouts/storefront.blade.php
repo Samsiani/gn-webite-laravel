@@ -79,7 +79,7 @@
             {{-- Desktop header --}}
             <div class="hidden lg:flex items-center justify-between h-[72px]">
                 <a wire:navigate href="{{ $prefix ?? '' }}/" class="shrink-0">
-                    <img src="/images/logo.png" alt="GN Industrial" class="h-12 w-auto">
+                    <img src="/images/logo.png" alt="GN Industrial" class="h-12 w-auto" width="155" height="48">
                 </a>
                 <div class="flex flex-1 max-w-xl mx-6">
                     @livewire('storefront.live-search')
@@ -137,7 +137,7 @@
             {{-- Mobile header: logo | search | hamburger --}}
             <div class="flex lg:hidden items-center gap-2.5 h-14">
                 <a wire:navigate href="{{ $prefix ?? '' }}/" class="shrink-0">
-                    <img src="/images/gn-mobile-logo.png" alt="GN Industrial" class="h-8 w-auto">
+                    <img src="/images/gn-mobile-logo.png" alt="GN Industrial" class="h-8 w-auto" width="20" height="32">
                 </a>
                 <div class="flex-1 min-w-0">
                     @livewire('storefront.live-search', [], key('mobile-search'))
@@ -167,15 +167,15 @@
                 {{-- Brand --}}
                 <div>
                     <div class="mb-4">
-                        <img src="/images/logo.png" alt="GN Industrial" class="h-10 w-auto" style="filter:brightness(0) invert(1)">
+                        <img src="/images/logo.png" alt="GN Industrial" class="h-10 w-auto" width="129" height="40" style="filter:brightness(0) invert(1)">
                     </div>
-                    <p class="text-white/70 text-sm leading-relaxed">{{ __('Professional kitchen equipment for restaurants, hotels, and food industry.') }}</p>
+                    <p class="text-white/90 text-sm leading-relaxed">{{ __('Professional kitchen equipment for restaurants, hotels, and food industry.') }}</p>
                 </div>
 
                 {{-- Quick Links --}}
                 <div>
                     <h3 class="font-semibold mb-4 text-sm uppercase tracking-wider">{{ __('Products') }}</h3>
-                    <ul class="space-y-2 text-sm text-white/70">
+                    <ul class="space-y-2 text-sm text-white/90">
                         @if(isset($categories))
                             @foreach($categories->take(6) as $cat)
                                 @php
@@ -190,7 +190,7 @@
                 {{-- Contact --}}
                 <div>
                     <h3 class="font-semibold mb-4 text-sm uppercase tracking-wider">{{ __('Contact') }}</h3>
-                    <ul class="space-y-3 text-sm text-white/70">
+                    <ul class="space-y-3 text-sm text-white/90">
                         <li class="flex items-center gap-2">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                             <a href="tel:+995593737673" class="hover:text-white transition">+995 593 73 76 73</a>
@@ -205,7 +205,7 @@
                 {{-- Address --}}
                 <div>
                     <h3 class="font-semibold mb-4 text-sm uppercase tracking-wider">{{ __('Address') }}</h3>
-                    <div class="text-sm text-white/70 space-y-2">
+                    <div class="text-sm text-white/90 space-y-2">
                         <p class="flex items-start gap-2">
                             <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             {{ __('Kaishi Street #15, Tbilisi, 1103, Georgia') }}
@@ -214,7 +214,7 @@
                 </div>
             </div>
 
-            <div class="border-t border-white/20 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-sm text-white/50">
+            <div class="border-t border-white/20 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-sm text-white/70">
                 <p>&copy; {{ date('Y') }} GN Industrial. {{ __('All rights reserved.') }}</p>
             </div>
         </div>
@@ -230,21 +230,21 @@
                 $isCart = str_contains($currentPath, 'cart') || str_contains($currentPath, 'checkout');
                 $isAccount = str_contains($currentPath, 'my-account') || str_contains($currentPath, 'login') || str_contains($currentPath, 'register');
             @endphp
-            <a wire:navigate href="{{ $prefix ?? '' }}/" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isHome ? 'text-primary' : 'text-gray-400' }}">
+            <a wire:navigate href="{{ $prefix ?? '' }}/" aria-label="{{ __('Home') }}" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isHome ? 'text-primary' : 'text-gray-500' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isHome ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
-                <span class="text-[10px] font-medium">{{ __('Home') }}</span>
+                <span class="text-[10px] font-semibold">{{ __('Home') }}</span>
             </a>
-            <a wire:navigate href="{{ ($prefix ?? '') }}/shop" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isShop ? 'text-primary' : 'text-gray-400' }}">
+            <a wire:navigate href="{{ ($prefix ?? '') }}/shop" aria-label="{{ __('Shop') }}" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isShop ? 'text-primary' : 'text-gray-500' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isShop ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                <span class="text-[10px] font-medium">{{ __('Shop') }}</span>
+                <span class="text-[10px] font-semibold">{{ __('Shop') }}</span>
             </a>
-            <a wire:navigate href="{{ ($prefix ?? '') }}/cart" class="flex flex-col items-center gap-0.5 px-3 py-1 relative {{ $isCart ? 'text-primary' : 'text-gray-400' }}">
+            <a wire:navigate href="{{ ($prefix ?? '') }}/cart" aria-label="{{ __('Cart') }}" class="flex flex-col items-center gap-0.5 px-3 py-1 relative {{ $isCart ? 'text-primary' : 'text-gray-500' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isCart ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                <span class="text-[10px] font-medium">{{ __('Cart') }}</span>
+                <span class="text-[10px] font-semibold">{{ __('Cart') }}</span>
             </a>
-            <a wire:navigate href="{{ ($prefix ?? '') }}/{{ auth()->check() ? 'my-account' : 'login' }}" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isAccount ? 'text-primary' : 'text-gray-400' }}">
+            <a wire:navigate href="{{ ($prefix ?? '') }}/{{ auth()->check() ? 'my-account' : 'login' }}" aria-label="{{ __('Account') }}" class="flex flex-col items-center gap-0.5 px-3 py-1 {{ $isAccount ? 'text-primary' : 'text-gray-500' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="{{ $isAccount ? '2' : '1.5' }}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                <span class="text-[10px] font-medium">{{ __('Account') }}</span>
+                <span class="text-[10px] font-semibold">{{ __('Account') }}</span>
             </a>
         </div>
     </nav>

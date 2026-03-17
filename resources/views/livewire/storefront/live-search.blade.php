@@ -9,11 +9,11 @@
                class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-4 pr-12 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white transition [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden">
         <div class="absolute right-1 top-1 bottom-1 flex items-center">
             @if(strlen($query) > 0)
-                <button wire:click="clear" class="px-2 text-gray-400 hover:text-gray-600">
+                <button wire:click="clear" aria-label="{{ __('Clear search') }}" class="px-2 text-gray-400 hover:text-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             @endif
-            <a wire:navigate href="{{ $prefix }}/shop{{ strlen($query) >= 3 ? '?q=' . urlencode($query) : '' }}" class="bg-primary text-white rounded-lg px-3 h-full flex items-center hover:bg-primary-dark transition">
+            <a wire:navigate href="{{ $prefix }}/shop{{ strlen($query) >= 3 ? '?q=' . urlencode($query) : '' }}" aria-label="{{ __('Search') }}" class="bg-primary text-white rounded-lg px-3 h-full flex items-center hover:bg-primary-dark transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </a>
         </div>

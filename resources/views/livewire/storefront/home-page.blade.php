@@ -27,7 +27,7 @@
             <div class="absolute inset-0 transition-opacity duration-[1500ms]"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
-                    <img src="{{ $bgImage }}" alt="" class="absolute inset-0 w-full h-full object-cover">
+                    <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
                     <div class="absolute inset-0" style="background:linear-gradient(to right, {{ $s->overlay_color ?? 'rgba(26,28,61,0.88)' }} 0%, rgba(80,82,157,0.7) 100%)"></div>
                 @else
                     <div class="absolute inset-0 bg-gradient-to-br {{ $s->bg_gradient ?? 'from-primary via-primary-dark to-[#2d2f5e]' }}"></div>
@@ -50,7 +50,7 @@
                             </div>
                             @endif
                             <h2 class="text-3xl md:text-5xl lg:text-[3.5rem] font-bold mb-5 leading-[1.15]">{{ $s->t('title', $locale) }}</h2>
-                            <p class="text-lg text-white/70 mb-8 leading-relaxed max-w-lg">{{ $s->t('subtitle', $locale) }}</p>
+                            <p class="text-lg text-white/90 mb-8 leading-relaxed max-w-lg">{{ $s->t('subtitle', $locale) }}</p>
                             <div class="flex flex-wrap gap-3">
                                 @if($s->t('cta_text', $locale))
                                 <a wire:navigate href="{{ $ctaUrl }}"
@@ -105,10 +105,12 @@
 
         {{-- Arrows --}}
         <button @click="slide = (slide + {{ $slides->count() - 1 }}) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
+                aria-label="{{ __('Previous Slide') }}"
                 class="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <button @click="slide = (slide + 1) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
+                aria-label="{{ __('Next Slide') }}"
                 class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
