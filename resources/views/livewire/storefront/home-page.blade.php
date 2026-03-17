@@ -3,7 +3,7 @@
     {{-- Hero Slider (database-driven) --}}
     @php $slides = \App\Models\Slide::active()->with('media')->get(); @endphp
     @if($slides->isNotEmpty())
-    <section class="relative text-white overflow-hidden"
+    <section class="relative text-white overflow-hidden bg-primary-dark min-h-[420px] md:min-h-[520px]"
              x-data="{
                 slide: 0, auto: null, total: {{ $slides->count() }}, touchX: 0,
                 next() { this.slide = (this.slide + 1) % this.total },
@@ -15,6 +15,20 @@
              @mouseenter="stopAuto()" @mouseleave="startAuto()"
              @touchstart.passive="touchX = $event.touches[0].clientX; stopAuto()"
              @touchend.passive="let diff = touchX - $event.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? next() : prev() } startAuto()">
+
+        {{-- Height spacer — invisible, sets stable height from first slide's padding --}}
+        <div class="invisible py-20 md:py-28" aria-hidden="true">
+            <div class="max-w-[1400px] mx-auto px-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="text-sm mb-6">&nbsp;</div>
+                        <div class="text-3xl md:text-5xl lg:text-[3.5rem] font-bold mb-5 leading-[1.15]">&nbsp;<br>&nbsp;</div>
+                        <div class="text-lg mb-8">&nbsp;<br>&nbsp;</div>
+                        <div class="py-3.5">&nbsp;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         @foreach($slides as $i => $s)
             @php
@@ -39,10 +53,9 @@
             </div>
 
             {{-- Content --}}
-            <div class="{{ $i === 0 ? 'relative' : 'absolute inset-0' }} flex items-center pointer-events-none z-10"
-                 style="transition: opacity 1.2s cubic-bezier(0.4,0,0.2,1), transform 1.2s cubic-bezier(0.4,0,0.2,1);"
-                 :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
-                 {!! $i > 0 ? 'x-cloak' : '' !!}>
+            <div class="absolute inset-0 flex items-center pointer-events-none z-10"
+                 style="transition: opacity 1.2s cubic-bezier(0.4,0,0.2,1), transform 1.2s cubic-bezier(0.4,0,0.2,1); will-change: opacity, transform;"
+                 :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
@@ -77,8 +90,8 @@
                         <div class="hidden lg:grid grid-cols-2 gap-4" :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @foreach($s->stats as $j => $stat)
                                 <div class="rounded-2xl p-6 relative overflow-hidden"
-                                     style="transition: opacity 0.8s ease {{ 0.15 + $j * 0.1 }}s, transform 0.8s ease {{ 0.15 + $j * 0.1 }}s;"
-                                     :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'">
+                                     style="transition: transform 0.8s cubic-bezier(0.4,0,0.2,1) {{ 0.15 + $j * 0.1 }}s; will-change: transform;"
+                                     :class="slide === {{ $i }} ? 'translate-y-0' : 'translate-y-3'">
                                     <div class="absolute inset-0 bg-white/[0.08]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"></div>
                                     <div class="relative">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
