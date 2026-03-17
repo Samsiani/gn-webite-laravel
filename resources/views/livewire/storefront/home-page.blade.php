@@ -30,7 +30,7 @@
             @endphp
 
             {{-- Background — simple crossfade --}}
-            <div class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out"
+            <div class="absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out {{ $i > 0 ? 'opacity-0' : '' }}"
                  :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                 @if($bgImage)
                     <img src="{{ $bgImage }}" alt="{{ $s->t('title', $locale) }}" class="absolute inset-0 w-full h-full object-cover" {{ $i === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' }}>
@@ -45,11 +45,11 @@
             </div>
 
             {{-- Content — static wrapper, inner elements fade --}}
-            <div class="absolute inset-0 flex items-center pointer-events-none z-10">
+            <div class="absolute inset-0 flex items-center pointer-events-none z-10" {!! $i > 0 ? 'x-cloak' : '' !!}>
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         {{-- Text column --}}
-                        <div class="transition-opacity duration-700 ease-in-out"
+                        <div class="{{ $i > 0 ? 'opacity-0' : '' }} transition-opacity duration-700 ease-in-out"
                              :class="slide === {{ $i }} ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'">
                             @if($s->t('badge', $locale))
                             <div class="inline-flex items-center gap-2 bg-white/[0.12] rounded-full px-4 py-1.5 text-sm mb-6">
@@ -81,10 +81,10 @@
                             @foreach($s->stats as $j => $stat)
                                 <div class="rounded-2xl relative overflow-hidden"
                                      :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
-                                    <div class="absolute inset-0 rounded-2xl bg-white/[0.08] transition-opacity duration-700 ease-in-out"
+                                    <div class="absolute inset-0 rounded-2xl bg-white/[0.08] transition-opacity duration-700 ease-in-out {{ $i > 0 ? 'opacity-0' : '' }}"
                                          style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);"
                                          :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'"></div>
-                                    <div class="relative p-6 transition-opacity duration-700 ease-in-out"
+                                    <div class="relative p-6 transition-opacity duration-700 ease-in-out {{ $i > 0 ? 'opacity-0' : '' }}"
                                          :class="slide === {{ $i }} ? 'opacity-100' : 'opacity-0'">
                                         <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
                                         <div class="text-white/60 text-sm">
