@@ -38,7 +38,19 @@ class BlockRenderer
         $content = $data['content'] ?? '';
         if (! $content) return '';
 
-        return '<div class="prose max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:my-3 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:list-disc prose-ul:pl-6 prose-ul:my-3 prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-3 prose-li:my-1 prose-a:text-primary prose-a:underline prose-blockquote:border-l-primary prose-blockquote:bg-gray-50 prose-blockquote:py-1 prose-blockquote:px-4 prose-img:rounded-xl prose-table:border prose-th:bg-gray-50 prose-th:px-4 prose-th:py-2 prose-td:px-4 prose-td:py-2 prose-td:border">' . $content . '</div>';
+        // Wrap tables in a scrollable container for mobile
+        $content = preg_replace(
+            '/<table/i',
+            '<div class="overflow-x-auto -mx-1 px-1"><table',
+            $content
+        );
+        $content = preg_replace(
+            '/<\/table>/i',
+            '</table></div>',
+            $content
+        );
+
+        return '<div class="prose max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:my-3 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:list-disc prose-ul:pl-6 prose-ul:my-3 prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-3 prose-li:my-1 prose-a:text-primary prose-a:underline prose-blockquote:border-l-primary prose-blockquote:bg-gray-50 prose-blockquote:py-1 prose-blockquote:px-4 prose-img:rounded-xl prose-table:w-full prose-table:border prose-table:border-gray-200 prose-table:rounded-lg prose-table:text-sm prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2.5 prose-th:text-left prose-th:font-semibold prose-th:text-gray-700 prose-th:border-b prose-th:border-gray-200 prose-td:px-3 prose-td:py-2 prose-td:border-b prose-td:border-gray-100 prose-td:text-gray-600">' . $content . '</div>';
     }
 
     private static function renderProducts(array $data, string $locale): string
@@ -98,7 +110,7 @@ class BlockRenderer
         $variant = $product->variants->first();
         $priceObj = $variant?->prices->first();
         $price = $priceObj ? number_format($priceObj->price->value / 100, 2) : null;
-        $image = $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
+        $image = $product->getFirstMediaUrl('images', 'thumb') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
         $url = $product->urls->first(fn ($u) => $u->language?->code === $locale) ?? $product->urls->firstWhere('default', true);
         $slug = $url?->slug ?? '';
 
@@ -107,7 +119,7 @@ class BlockRenderer
         $html = '<div class="my-6 bg-white rounded-xl border border-gray-100 p-4 flex gap-4 items-center">';
         if ($image) {
             $html .= '<a href="' . $prefix . '/product/' . $slug . '" class="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden shrink-0">';
-            $html .= '<img src="' . $image . '" alt="' . e($name) . '" class="w-full h-full object-contain p-2"></a>';
+            $html .= '<img src="' . $image . '" alt="' . e($name) . '" class="w-full h-full object-contain p-2" loading="lazy" onload="this.classList.add(\'loaded\')"></a>';
         }
         $html .= '<div class="flex-1 min-w-0">';
         $html .= '<a href="' . $prefix . '/product/' . $slug . '" class="font-semibold text-gray-900 hover:text-primary transition">' . e($name) . '</a>';
@@ -210,14 +222,14 @@ class BlockRenderer
         $price = $priceObj ? number_format($priceObj->price->value / 100, 2) : null;
         $comparePrice = ($priceObj?->compare_price && $priceObj->compare_price->value > 0) ? number_format($priceObj->compare_price->value / 100, 2) : null;
         $onSale = $comparePrice && (float) str_replace(',', '', $comparePrice) > (float) str_replace(',', '', $price);
-        $image = $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
+        $image = $product->getFirstMediaUrl('images', 'thumb') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
         $url = $product->urls->first(fn ($u) => $u->language?->code === $locale) ?? $product->urls->firstWhere('default', true);
         $slug = $url?->slug ?? '';
         $sku = $variant?->sku;
 
         $html = '<a href="' . $prefix . '/product/' . $slug . '" class="product-card bg-white rounded-xl border border-gray-100 overflow-hidden group block">';
         $html .= '<div class="aspect-square bg-white overflow-hidden relative">';
-        if ($image) $html .= '<img src="' . $image . '" alt="' . e($name) . '" loading="lazy" class="w-full h-full object-contain p-3">';
+        if ($image) $html .= '<img src="' . $image . '" alt="' . e($name) . '" loading="lazy" onload="this.classList.add(\'loaded\')" class="w-full h-full object-contain p-3">';
         if ($onSale) {
             $pct = round((1 - (float) str_replace(',', '', $price) / (float) str_replace(',', '', $comparePrice)) * 100);
             $html .= '<span class="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">-' . $pct . '%</span>';

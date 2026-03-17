@@ -43,6 +43,28 @@ img {
     transform: translateY(-3px);
 }
 
+/* ── Blog tables — responsive + clean ── */
+.prose table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 0.875rem;
+}
+.prose table th,
+.prose table td {
+    white-space: nowrap;
+}
+@media (max-width: 640px) {
+    .prose table th,
+    .prose table td {
+        white-space: normal;
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.625rem;
+    }
+}
+.prose table tr:hover td {
+    background-color: #f8f9fa;
+}
+
 .specs-table tr {
     transition: background-color 0.2s ease;
 }
