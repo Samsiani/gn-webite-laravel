@@ -4,7 +4,9 @@ namespace App\Filament\Pages;
 
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -37,6 +39,73 @@ class SiteSettings extends Page implements HasForms
     {
         return $form
             ->schema([
+                Section::make('SEO — Global')
+                    ->description('Search engine optimization defaults')
+                    ->icon('heroicon-o-magnifying-glass')
+                    ->schema([
+                        Toggle::make('seo_noindex')
+                            ->label('Block search engine indexing (noindex, nofollow)')
+                            ->helperText('Keep ON while site is in staging. Turn OFF when going live.')
+                            ->default(true),
+                        TextInput::make('seo_title_suffix')
+                            ->label('Title Suffix')
+                            ->placeholder(' — GN Industrial')
+                            ->helperText('Appended to every page title (e.g. " — GN Industrial")'),
+                        Textarea::make('seo_default_description')
+                            ->label('Default Meta Description')
+                            ->placeholder('Professional kitchen equipment for restaurants, hotels, and food industry.')
+                            ->rows(2)
+                            ->helperText('Used when a page has no specific description'),
+                        TextInput::make('seo_og_image')
+                            ->label('Default OG Image URL')
+                            ->placeholder('https://laravel.gn.ge/images/og-default.jpg')
+                            ->helperText('Default social sharing image (1200x630px recommended)'),
+                    ])
+                    ->columns(1)
+                    ->collapsible(),
+
+                Section::make('SEO — LocalBusiness Schema')
+                    ->description('Structured data for Google Rich Results')
+                    ->icon('heroicon-o-building-storefront')
+                    ->schema([
+                        TextInput::make('schema_business_name')
+                            ->label('Business Name')
+                            ->placeholder('GN Industrial'),
+                        TextInput::make('schema_business_type')
+                            ->label('Business Type')
+                            ->placeholder('Store')
+                            ->helperText('Schema.org type: Store, Restaurant, LocalBusiness, etc.'),
+                        TextInput::make('schema_street')
+                            ->label('Street Address')
+                            ->placeholder('Kaishi Street #15'),
+                        TextInput::make('schema_city')
+                            ->label('City')
+                            ->placeholder('Tbilisi'),
+                        TextInput::make('schema_postal')
+                            ->label('Postal Code')
+                            ->placeholder('1103'),
+                        TextInput::make('schema_country')
+                            ->label('Country')
+                            ->placeholder('GE'),
+                        TextInput::make('schema_phone')
+                            ->label('Phone')
+                            ->placeholder('+995 593 73 76 73'),
+                        TextInput::make('schema_email')
+                            ->label('Email')
+                            ->placeholder('info@gn.ge'),
+                        TextInput::make('schema_logo')
+                            ->label('Logo URL')
+                            ->placeholder('https://laravel.gn.ge/images/logo.png')
+                            ->helperText('Full URL to your logo for Schema.org'),
+                        TextInput::make('schema_url')
+                            ->label('Website URL')
+                            ->placeholder('https://gn.ge')
+                            ->helperText('Primary website URL for Schema.org'),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(),
+
                 Section::make('Contact Form')
                     ->description('Where contact form submissions are sent')
                     ->icon('heroicon-o-envelope')
@@ -159,20 +228,39 @@ class SiteSettings extends Page implements HasForms
     {
         $file = storage_path(static::$settingsFile);
 
+        $defaults = [
+            // SEO
+            'seo_noindex' => true,
+            'seo_title_suffix' => ' — GN Industrial',
+            'seo_default_description' => 'Professional kitchen equipment for restaurants, hotels, and food industry.',
+            'seo_og_image' => '',
+            // Schema
+            'schema_business_name' => 'GN Industrial',
+            'schema_business_type' => 'Store',
+            'schema_street' => 'Kaishi Street #15',
+            'schema_city' => 'Tbilisi',
+            'schema_postal' => '1103',
+            'schema_country' => 'GE',
+            'schema_phone' => '+995 593 73 76 73',
+            'schema_email' => 'info@gn.ge',
+            'schema_logo' => 'https://laravel.gn.ge/images/logo.png',
+            'schema_url' => 'https://gn.ge',
+            // Contact/Mail
+            'contact_email' => 'info@gn.ge',
+            'mail_host' => '',
+            'mail_port' => '587',
+            'mail_encryption' => 'tls',
+            'mail_username' => '',
+            'mail_password' => '',
+            'mail_from_address' => '',
+            'mail_from_name' => 'GN Industrial',
+        ];
+
         if (! file_exists($file)) {
-            return [
-                'contact_email' => 'info@gn.ge',
-                'mail_host' => '',
-                'mail_port' => '587',
-                'mail_encryption' => 'tls',
-                'mail_username' => '',
-                'mail_password' => '',
-                'mail_from_address' => '',
-                'mail_from_name' => 'GN Industrial',
-            ];
+            return $defaults;
         }
 
-        $data = json_decode(file_get_contents($file), true) ?: [];
+        $data = array_merge($defaults, json_decode(file_get_contents($file), true) ?: []);
 
         // Decrypt SMTP password
         if (! empty($data['mail_password'])) {

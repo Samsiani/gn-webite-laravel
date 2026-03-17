@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="ltr">
+@php $seoSettings = \App\Filament\Pages\SiteSettings::getSettings(); @endphp
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $metaTitle ?? 'GN Industrial — ' . __('Professional Kitchen Equipment') }}</title>
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="{{ $metaDescription ?? __('Professional kitchen equipment for restaurants, hotels, and food industry.') }}">
+
+    {{-- Title --}}
+    <title>{{ $metaTitle ?? \App\Services\SeoHelper::title(__('Professional Kitchen Equipment')) }}</title>
+
+    {{-- Robots --}}
+    <meta name="robots" content="{{ \App\Services\SeoHelper::robots() }}">
+
+    {{-- Description --}}
+    @php $desc = $metaDescription ?? \App\Services\SeoHelper::defaultDescription(); @endphp
+    <meta name="description" content="{{ $desc }}">
+
+    {{-- Canonical --}}
     @if(isset($canonical))
         <link rel="canonical" href="{{ $canonical }}">
+    @else
+        <link rel="canonical" href="{{ url()->current() }}">
     @endif
+
+    {{-- Hreflang --}}
     @if(isset($hreflangs))
         @foreach($hreflangs as $lang => $url)
             <link rel="alternate" hreflang="{{ $lang }}" href="{{ $url }}">
@@ -17,6 +31,28 @@
             <link rel="alternate" hreflang="x-default" href="{{ $hreflangs['ka'] }}">
         @endif
     @endif
+
+    {{-- Open Graph --}}
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:title" content="{{ $metaTitle ?? \App\Services\SeoHelper::title(__('Professional Kitchen Equipment')) }}">
+    <meta property="og:description" content="{{ $desc }}">
+    <meta property="og:url" content="{{ $canonical ?? url()->current() }}">
+    <meta property="og:image" content="{{ $ogImage ?? \App\Services\SeoHelper::defaultOgImage() }}">
+    <meta property="og:locale" content="{{ app()->getLocale() === 'ka' ? 'ka_GE' : (app()->getLocale() === 'ru' ? 'ru_RU' : 'en_US') }}">
+    <meta property="og:site_name" content="{{ $seoSettings['schema_business_name'] ?? 'GN Industrial' }}">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $metaTitle ?? \App\Services\SeoHelper::title(__('Professional Kitchen Equipment')) }}">
+    <meta name="twitter:description" content="{{ $desc }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? \App\Services\SeoHelper::defaultOgImage() }}">
+
+    {{-- Global Schema.org JSON-LD --}}
+    {!! \App\Services\SeoHelper::globalSchema() !!}
+
+    {{-- Per-page Schema.org --}}
+    @stack('schema')
+
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
