@@ -39,10 +39,10 @@
             </div>
 
             {{-- Content --}}
-            <div class="{{ $i === 0 ? 'relative' : 'absolute inset-0' }} flex items-center transition-all duration-[1200ms]"
+            <div class="{{ $i === 0 ? 'relative' : 'absolute inset-0' }} flex items-center transition-all duration-[1200ms] pointer-events-none z-10"
                  :class="slide === {{ $i }} ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
                  {!! $i > 0 ? 'x-cloak' : '' !!}>
-                <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
+                <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28 pointer-events-auto">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
                             @if($s->t('badge', $locale))
@@ -108,12 +108,12 @@
         {{-- Arrows --}}
         <button @click="slide = (slide + {{ $slides->count() - 1 }}) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
                 aria-label="{{ __('Previous Slide') }}"
-                class="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
+                class="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <button @click="slide = (slide + 1) % {{ $slides->count() }}; clearInterval(auto); auto = setInterval(() => slide = (slide + 1) % {{ $slides->count() }}, 8000)"
                 aria-label="{{ __('Next Slide') }}"
-                class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
+                class="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition hidden md:flex">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
         @endif
