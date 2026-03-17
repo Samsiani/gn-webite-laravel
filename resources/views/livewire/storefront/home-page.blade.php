@@ -56,7 +56,7 @@
             {{-- Content — outer wrapper is STATIC, stays visible during exit --}}
             <div class="absolute inset-0 flex items-center pointer-events-none z-10"
                  :style="slide === {{ $i }} ? '' : 'transition: visibility 0s linear 600ms; visibility: hidden;'"
-                 :class="slide === {{ $i }} ? 'visible' : ''"
+                 :class="slide === {{ $i }} ? 'visible' : ''">
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         {{-- Text column — sequential: exit 0ms delay, enter 550ms delay --}}
