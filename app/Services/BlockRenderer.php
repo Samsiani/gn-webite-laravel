@@ -110,7 +110,7 @@ class BlockRenderer
         $variant = $product->variants->first();
         $priceObj = $variant?->prices->first();
         $price = $priceObj ? number_format($priceObj->price->value / 100, 2) : null;
-        $image = $product->getFirstMediaUrl('images', 'thumb') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
+        $image = $product->getFirstMediaUrl('images', 'medium') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
         $url = $product->urls->first(fn ($u) => $u->language?->code === $locale) ?? $product->urls->firstWhere('default', true);
         $slug = $url?->slug ?? '';
 
@@ -222,7 +222,7 @@ class BlockRenderer
         $price = $priceObj ? number_format($priceObj->price->value / 100, 2) : null;
         $comparePrice = ($priceObj?->compare_price && $priceObj->compare_price->value > 0) ? number_format($priceObj->compare_price->value / 100, 2) : null;
         $onSale = $comparePrice && (float) str_replace(',', '', $comparePrice) > (float) str_replace(',', '', $price);
-        $image = $product->getFirstMediaUrl('images', 'thumb') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
+        $image = $product->getFirstMediaUrl('images', 'medium') ?: $product->getFirstMediaUrl('images') ?: $product->getFirstMediaUrl('gallery');
         $url = $product->urls->first(fn ($u) => $u->language?->code === $locale) ?? $product->urls->firstWhere('default', true);
         $slug = $url?->slug ?? '';
         $sku = $variant?->sku;
