@@ -44,7 +44,7 @@
                  {!! $i > 0 ? 'x-cloak' : '' !!}>
                 <div class="max-w-[1400px] mx-auto px-4 w-full py-20 md:py-28">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div class="pointer-events-auto">
+                        <div :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @if($s->t('badge', $locale))
                             <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm mb-6">
                                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -70,7 +70,7 @@
                             </div>
                         </div>
                         @if($s->show_stats && !empty($s->stats))
-                        <div class="hidden lg:grid grid-cols-2 gap-4 pointer-events-auto">
+                        <div class="hidden lg:grid grid-cols-2 gap-4" :class="slide === {{ $i }} ? 'pointer-events-auto' : 'pointer-events-none'">
                             @foreach($s->stats as $stat)
                                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                                     <div class="text-3xl font-bold mb-1">{{ $stat['value'] ?? '' }}</div>
