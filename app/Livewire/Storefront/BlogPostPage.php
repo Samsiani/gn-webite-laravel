@@ -52,12 +52,12 @@ class BlogPostPage extends Component
 
         $categories = StorefrontData::categories();
 
+        $blogImage = $this->post->getFirstMediaUrl('featured', 'large') ?: $this->post->getFirstMediaUrl('featured');
+
         return view('livewire.storefront.blog-post-page', [
             'recentPosts' => $recentPosts,
             'hreflangs' => $hreflangs,
             'locale' => $locale,
-        $blogImage = $this->post->getFirstMediaUrl('featured', 'large') ?: $this->post->getFirstMediaUrl('featured');
-
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($this->post->t('meta_title') ?: $this->post->t('title')),
