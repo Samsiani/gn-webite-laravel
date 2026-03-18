@@ -228,7 +228,7 @@
         if ($price) {
             $schema['offers'] = [
                 '@type' => 'Offer',
-                'price' => $price,
+                'price' => str_replace(',', '', $price),
                 'priceCurrency' => 'GEL',
                 'availability' => 'https://schema.org/' . ($variant && $variant->stock > 0 ? 'InStock' : 'OutOfStock'),
                 'url' => url()->current(),
