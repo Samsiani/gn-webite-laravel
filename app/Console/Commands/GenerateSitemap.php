@@ -33,8 +33,11 @@ class GenerateSitemap extends Command
         $this->generateBlogCategoriesSitemap($index);
 
         $index->writeToFile(public_path('sitemap.xml'));
-        $this->info('Sitemap index generated → sitemap.xml');
 
+        // Inject XSL stylesheet reference into all sitemap files
+        $this->injectXsl();
+
+        $this->info('Sitemap index generated → sitemap.xml');
         return self::SUCCESS;
     }
 
@@ -214,5 +217,23 @@ class GenerateSitemap extends Command
     private function baseUrl(): string
     {
         return rtrim(config('app.url'), '/');
+    }
+
+    private function injectXsl(): void
+    {
+        $xsl = '<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>';
+        $files = glob(public_path('*sitemap*.xml'));
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            if (! str_contains($content, 'xml-stylesheet')) {
+                $content = str_replace(
+                    '<?xml version="1.0" encoding="UTF-8"?>',
+                    '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . $xsl,
+                    $content
+                );
+                file_put_contents($file, $content);
+            }
+        }
     }
 }
