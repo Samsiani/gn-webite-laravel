@@ -128,7 +128,7 @@ class ProductDetailPage extends Component
         $name = $this->product->translateAttribute('name', $locale) ?? $this->product->translateAttribute('name');
         $desc = $this->product->translateAttribute('description', $locale) ?? $this->product->translateAttribute('description');
         $metaDesc = \Illuminate\Support\Str::limit(strip_tags($shortDescription ?: $desc), 160);
-        $ogImg = $this->product->getFirstMediaUrl('images', 'medium') ?: $this->product->getFirstMediaUrl('images');
+        $ogImg = $this->product->getFirstMediaUrl('images', 'large') ?: $this->product->getFirstMediaUrl('images');
 
         return view('livewire.storefront.product-detail-page', [
             'price' => $price,
