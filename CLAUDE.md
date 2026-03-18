@@ -97,6 +97,21 @@ Use for:
 - ALWAYS use `getFirstMediaUrl('collection', 'thumb')` with fallback for all thumbnails
 - Homepage blog section, blog archive, blog sidebar — all must use `'thumb'` conversion
 
+## SEO
+- `app/Services/SeoHelper.php` — robots(), title(), defaultDescription(), defaultOgImage(), globalSchema()
+- Admin configurable: `/admin/site-settings` → SEO Global + LocalBusiness Schema sections
+- Layout head: dynamic meta title/desc, OG tags, Twitter cards, canonical, hreflangs
+- Per-page SEO from Livewire components via `->layout()` second param
+- Schema.org JSON-LD: Organization, WebSite+SearchAction, Product+BreadcrumbList, Article+BreadcrumbList, CollectionPage+BreadcrumbList
+- Robots: controlled from admin settings (noindex default for staging)
+- Sitemap: `php artisan sitemap:generate` (via SSH, daily cron at 4 AM)
+  - Rank Math pattern: `sitemap.xml` → index with sub-sitemaps
+  - `page-sitemap.xml`, `product-sitemap{N}.xml` (paginated 1000/file), `product_cat-sitemap.xml`, `post-sitemap.xml`, `category-sitemap.xml`
+  - XSL stylesheet at `/sitemap.xsl` for visual browser display
+  - All sitemaps include hreflang alternates (ka/en/ru)
+- `robots.txt` in `public/` — allows all crawlers, points to sitemap index
+- Cloudflare note: Facebook/Google crawlers blocked by Cloudflare JS challenge on Free plan. ASN IP Access Rules (AS32934, AS63293) or disabling Cloudflare proxy required for social crawlers.
+
 ## Blog Import
 - Command: `php artisan gn:import-blog --limit=5`
 - Imports from WooCommerce REST API with ka/en/ru translations
