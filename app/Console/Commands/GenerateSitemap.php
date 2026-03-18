@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use Illuminate\Console\Command;
 use Lunar\Models\Collection as LunarCollection;
@@ -14,25 +15,30 @@ use Spatie\Sitemap\Tags\Url;
 class GenerateSitemap extends Command
 {
     protected $signature = 'sitemap:generate';
-    protected $description = 'Generate sitemap index with sub-sitemaps for products, categories, blog, and pages';
+    protected $description = 'Generate sitemap index with sub-sitemaps (Rank Math pattern)';
 
     private array $languages = ['ka', 'en', 'ru'];
+    private int $perFile = 1000;
 
     public function handle(): int
     {
         $this->info('Generating sitemaps...');
 
-        $this->generatePagesSitemap();
-        $this->generateProductsSitemap();
-        $this->generateCategoriesSitemap();
-        $this->generateBlogSitemap();
-        $this->generateSitemapIndex();
+        $index = SitemapIndex::create();
 
-        $this->info('All sitemaps generated.');
+        $this->generatePagesSitemap($index);
+        $this->generateProductSitemaps($index);
+        $this->generateCategoriesSitemap($index);
+        $this->generateBlogSitemap($index);
+        $this->generateBlogCategoriesSitemap($index);
+
+        $index->writeToFile(public_path('sitemap.xml'));
+        $this->info('Sitemap index generated → sitemap.xml');
+
         return self::SUCCESS;
     }
 
-    private function generatePagesSitemap(): void
+    private function generatePagesSitemap(SitemapIndex $index): void
     {
         $sitemap = Sitemap::create();
         $pages = ['/', '/shop', '/blog', '/contact'];
@@ -43,53 +49,64 @@ class GenerateSitemap extends Command
                 ->setPriority($page === '/' ? 1.0 : 0.7);
 
             foreach ($this->languages as $lang) {
-                $prefix = $lang === 'ka' ? '' : '/' . $lang;
-                $url->addAlternate($this->url($prefix, $page), $lang);
+                $url->addAlternate($this->url($lang === 'ka' ? '' : '/' . $lang, $page), $lang);
             }
             $sitemap->add($url);
         }
 
-        $sitemap->writeToFile(public_path('pages-sitemap.xml'));
-        $this->info("  Pages: " . count($pages) . " URLs");
+        $path = 'page-sitemap.xml';
+        $sitemap->writeToFile(public_path($path));
+        $index->add($this->baseUrl() . '/' . $path);
+        $this->info("  Pages: " . count($pages) . " URLs → {$path}");
     }
 
-    private function generateProductsSitemap(): void
+    private function generateProductSitemaps(SitemapIndex $index): void
     {
         $products = Product::where('status', 'published')
             ->with(['urls.language'])
+            ->orderBy('id')
             ->get();
 
-        $sitemap = Sitemap::create();
+        $chunks = $products->chunk($this->perFile);
+        $total = $products->count();
+        $fileNum = 0;
 
-        foreach ($products as $product) {
-            $urls = [];
-            foreach ($product->urls as $u) {
-                $lang = $u->language?->code;
-                if ($lang) {
-                    $prefix = $lang === 'ka' ? '' : '/' . $lang;
-                    $urls[$lang] = $this->url($prefix, '/product/' . $u->slug);
+        foreach ($chunks as $chunk) {
+            $fileNum++;
+            $sitemap = Sitemap::create();
+
+            foreach ($chunk as $product) {
+                $urls = [];
+                foreach ($product->urls as $u) {
+                    $lang = $u->language?->code;
+                    if ($lang) {
+                        $urls[$lang] = $this->url($lang === 'ka' ? '' : '/' . $lang, '/product/' . $u->slug);
+                    }
                 }
+
+                $primary = $urls['ka'] ?? $urls['en'] ?? reset($urls);
+                if (! $primary) continue;
+
+                $url = Url::create($primary)
+                    ->setLastModificationDate($product->updated_at)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                    ->setPriority(0.8);
+
+                foreach ($urls as $lang => $href) {
+                    $url->addAlternate($href, $lang);
+                }
+                $sitemap->add($url);
             }
 
-            $primary = $urls['ka'] ?? $urls['en'] ?? reset($urls);
-            if (! $primary) continue;
-
-            $url = Url::create($primary)
-                ->setLastModificationDate($product->updated_at)
-                ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
-                ->setPriority(0.8);
-
-            foreach ($urls as $lang => $href) {
-                $url->addAlternate($href, $lang);
-            }
-            $sitemap->add($url);
+            $path = "product-sitemap{$fileNum}.xml";
+            $sitemap->writeToFile(public_path($path));
+            $index->add($this->baseUrl() . '/' . $path);
         }
 
-        $sitemap->writeToFile(public_path('products-sitemap.xml'));
-        $this->info("  Products: {$products->count()} URLs");
+        $this->info("  Products: {$total} URLs → {$fileNum} file(s)");
     }
 
-    private function generateCategoriesSitemap(): void
+    private function generateCategoriesSitemap(SitemapIndex $index): void
     {
         $group = CollectionGroup::where('handle', 'product-categories')->first();
         if (! $group) return;
@@ -106,8 +123,7 @@ class GenerateSitemap extends Command
             foreach ($collection->urls as $u) {
                 $lang = $u->language?->code;
                 if ($lang) {
-                    $prefix = $lang === 'ka' ? '' : '/' . $lang;
-                    $urls[$lang] = $this->url($prefix, '/category/' . $u->slug);
+                    $urls[$lang] = $this->url($lang === 'ka' ? '' : '/' . $lang, '/category/' . $u->slug);
                 }
             }
 
@@ -125,11 +141,13 @@ class GenerateSitemap extends Command
             $sitemap->add($url);
         }
 
-        $sitemap->writeToFile(public_path('categories-sitemap.xml'));
-        $this->info("  Categories: {$collections->count()} URLs");
+        $path = 'product_cat-sitemap.xml';
+        $sitemap->writeToFile(public_path($path));
+        $index->add($this->baseUrl() . '/' . $path);
+        $this->info("  Product categories: {$collections->count()} URLs → {$path}");
     }
 
-    private function generateBlogSitemap(): void
+    private function generateBlogSitemap(SitemapIndex $index): void
     {
         $posts = BlogPost::published()->get();
         $sitemap = Sitemap::create();
@@ -150,26 +168,51 @@ class GenerateSitemap extends Command
             $sitemap->add($url);
         }
 
-        $sitemap->writeToFile(public_path('blog-sitemap.xml'));
-        $this->info("  Blog: {$posts->count()} URLs");
+        $path = 'post-sitemap.xml';
+        $sitemap->writeToFile(public_path($path));
+        $index->add($this->baseUrl() . '/' . $path);
+        $this->info("  Blog posts: {$posts->count()} URLs → {$path}");
     }
 
-    private function generateSitemapIndex(): void
+    private function generateBlogCategoriesSitemap(SitemapIndex $index): void
     {
-        $baseUrl = rtrim(config('app.url'), '/');
+        $categories = BlogCategory::withCount(['posts' => fn ($q) => $q->published()])
+            ->having('posts_count', '>', 0)
+            ->get();
 
-        SitemapIndex::create()
-            ->add("{$baseUrl}/pages-sitemap.xml")
-            ->add("{$baseUrl}/products-sitemap.xml")
-            ->add("{$baseUrl}/categories-sitemap.xml")
-            ->add("{$baseUrl}/blog-sitemap.xml")
-            ->writeToFile(public_path('sitemap.xml'));
+        if ($categories->isEmpty()) return;
 
-        $this->info("  Index: sitemap.xml → 4 sub-sitemaps");
+        $sitemap = Sitemap::create();
+
+        foreach ($categories as $cat) {
+            $urls = ['ka' => $this->url('', '/blog/category/' . $cat->slug)];
+            if ($cat->slug_en) $urls['en'] = $this->url('/en', '/blog/category/' . $cat->slug_en);
+            if ($cat->slug_ru) $urls['ru'] = $this->url('/ru', '/blog/category/' . $cat->slug_ru);
+
+            $url = Url::create($urls['ka'])
+                ->setLastModificationDate($cat->updated_at)
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                ->setPriority(0.5);
+
+            foreach ($urls as $lang => $href) {
+                $url->addAlternate($href, $lang);
+            }
+            $sitemap->add($url);
+        }
+
+        $path = 'category-sitemap.xml';
+        $sitemap->writeToFile(public_path($path));
+        $index->add($this->baseUrl() . '/' . $path);
+        $this->info("  Blog categories: {$categories->count()} URLs → {$path}");
     }
 
     private function url(string $prefix, string $path): string
     {
-        return rtrim(config('app.url'), '/') . $prefix . $path;
+        return $this->baseUrl() . $prefix . $path;
+    }
+
+    private function baseUrl(): string
+    {
+        return rtrim(config('app.url'), '/');
     }
 }
