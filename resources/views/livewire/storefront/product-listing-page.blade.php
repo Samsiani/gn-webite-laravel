@@ -133,6 +133,20 @@
                         <p class="text-gray-400">{{ __('No products found in this category.') }}</p>
                     </div>
                 @endif
+
+                {{-- Category Description (from admin rich text) --}}
+                @if($collection)
+                    @php
+                        $catDescription = $collection->translateAttribute('description', $locale) ?? $collection->translateAttribute('description') ?? '';
+                    @endphp
+                    @if(trim(strip_tags($catDescription)) !== '')
+                        <div class="mt-10 pt-8 border-t border-gray-100">
+                            <div class="prose max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:my-3 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:list-disc prose-ul:pl-6 prose-ul:my-3 prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-3 prose-li:my-1 prose-a:text-primary prose-a:underline prose-img:rounded-xl">
+                                {!! $catDescription !!}
+                            </div>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>
