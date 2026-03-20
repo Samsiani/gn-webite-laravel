@@ -18,7 +18,7 @@
              megaShow() { clearTimeout(this._t); this.megaOpen = true; },
              megaHide() { this._t = setTimeout(() => this.megaOpen = false, 120); }
          }">
-        <div class="max-w-[1400px] mx-auto px-4">
+        <div class="max-w-[1400px] mx-auto px-4 relative" style="z-index:51">
             <ul class="flex items-center">
                 @foreach($menuItems as $item)
                     @php
