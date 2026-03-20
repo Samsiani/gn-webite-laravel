@@ -38,10 +38,10 @@ class BlockRenderer
         $content = $data['content'] ?? '';
         if (! $content) return '';
 
-        // Wrap tables in a scrollable container for mobile
+        // Wrap tables in a responsive container
         $content = preg_replace(
             '/<table/i',
-            '<div class="overflow-x-auto -mx-1 px-1"><table',
+            '<div class="blog-table-wrap"><table',
             $content
         );
         $content = preg_replace(
@@ -50,7 +50,7 @@ class BlockRenderer
             $content
         );
 
-        return '<div class="prose max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:my-3 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:list-disc prose-ul:pl-6 prose-ul:my-3 prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-3 prose-li:my-1 prose-a:text-primary prose-a:underline prose-blockquote:border-l-primary prose-blockquote:bg-gray-50 prose-blockquote:py-1 prose-blockquote:px-4 prose-img:rounded-xl prose-table:w-full prose-table:border prose-table:border-gray-200 prose-table:rounded-lg prose-table:text-sm prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2.5 prose-th:text-left prose-th:font-semibold prose-th:text-gray-700 prose-th:border-b prose-th:border-gray-200 prose-td:px-3 prose-td:py-2 prose-td:border-b prose-td:border-gray-100 prose-td:text-gray-600">' . $content . '</div>';
+        return '<div class="prose max-w-none text-gray-600 prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:my-3 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:list-disc prose-ul:pl-6 prose-ul:my-3 prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-3 prose-li:my-1 prose-a:text-primary prose-a:underline prose-blockquote:border-l-primary prose-blockquote:bg-gray-50 prose-blockquote:py-1 prose-blockquote:px-4 prose-img:rounded-xl">' . $content . '</div>';
     }
 
     private static function renderProducts(array $data, string $locale): string

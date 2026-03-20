@@ -44,25 +44,63 @@ img {
 }
 
 /* ── Blog tables — responsive + clean ── */
-.prose table {
+.blog-table-wrap {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    margin: 1.25rem 0;
+}
+.blog-table-wrap table {
+    width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
     font-size: 0.875rem;
+    table-layout: auto;
+    border: none;
 }
-.prose table th,
-.prose table td {
-    white-space: nowrap;
+.blog-table-wrap table th,
+.blog-table-wrap table td {
+    white-space: normal;
+    word-break: break-word;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+}
+.blog-table-wrap table th {
+    background-color: #f8f9fb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 0.75rem 1rem;
+}
+.blog-table-wrap table td {
+    padding: 0.625rem 1rem;
+    color: #4b5563;
+    vertical-align: top;
+}
+.blog-table-wrap table tr:last-child td {
+    border-bottom: none;
+}
+.blog-table-wrap table tr:hover td {
+    background-color: #f8f9fb;
+}
+.blog-table-wrap table tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+.blog-table-wrap table tr:nth-child(even):hover td {
+    background-color: #f3f4f6;
 }
 @media (max-width: 640px) {
-    .prose table th,
-    .prose table td {
-        white-space: normal;
+    .blog-table-wrap table th,
+    .blog-table-wrap table td {
         font-size: 0.8125rem;
         padding: 0.5rem 0.625rem;
     }
-}
-.prose table tr:hover td {
-    background-color: #f8f9fa;
+    .blog-table-wrap table th {
+        font-size: 0.75rem;
+    }
 }
 
 .specs-table tr {
