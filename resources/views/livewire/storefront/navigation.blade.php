@@ -11,7 +11,7 @@
 @endphp
 <div>
     {{-- Desktop --}}
-    <nav class="hidden lg:block" x-data="{ open: false }" @mouseleave="open = false">
+    <nav class="hidden lg:block" x-data="{ open: false }">
         <div class="max-w-[1400px] mx-auto px-4">
             <ul class="flex items-center">
                 @foreach($menuItems as $item)
@@ -20,119 +20,121 @@
                         $url = $item->getResolvedUrl($locale);
                         $hasChildren = $item->children->isNotEmpty();
                     @endphp
-                    <li class="relative" @if($hasChildren) @mouseenter="open = true" @else @mouseenter="open = false" @endif>
-                        <a wire:navigate href="{{ $url }}"
-                           class="relative flex items-center gap-1.5 px-5 py-4 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200"
-                           :class="open && {{ $hasChildren ? 'true' : 'false' }} ? 'text-primary' : 'text-gray-600 hover:text-primary'">
-                            {{ $label }}
-                            @if($hasChildren)
+                    @if($hasChildren)
+                        <li class="relative" @mouseenter="open = true" @mouseleave="open = false">
+                            <a wire:navigate href="{{ $url }}"
+                               class="relative flex items-center gap-1.5 px-5 py-4 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer"
+                               :class="open ? 'text-primary' : 'text-gray-600 hover:text-primary'">
+                                {{ $label }}
                                 <svg class="w-3 h-3 transition-transform duration-300" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                <span class="absolute bottom-0 left-5 right-5 h-[2px] rounded-full transition-all duration-300"
+                                <span class="absolute bottom-0 left-5 right-5 h-[2px] rounded-full transition-all duration-300 pointer-events-none"
                                       :class="open ? 'bg-primary scale-x-100' : 'bg-transparent scale-x-0'"
                                       style="transform-origin:left"></span>
+                            </a>
+
+                            {{-- Mega Panel (absolute, full-width centered on <li>) --}}
+                            @if($megaChildren->isNotEmpty())
+                                <div x-show="open" x-cloak
+                                     style="position:absolute;left:50%;transform:translateX(-50%);width:100vw;z-index:50;top:100%"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 translate-y-[-4px]"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 translate-y-[-4px]">
+
+                                    <div style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)">
+                                        <div class="max-w-[1400px] mx-auto" style="padding:28px 24px 20px">
+                                            <div class="flex">
+                                                @foreach($megaCols as $colIndex => $colItems)
+                                                    <div class="flex-1" style="{{ $colIndex < $megaCols->count() - 1 ? 'border-right:1px solid rgba(80,82,157,0.05);padding-right:16px;margin-right:16px' : '' }}">
+                                                        @foreach($colItems as $child)
+                                                            @php
+                                                                $childLabel = $child->getTranslatedLabel($locale);
+                                                                $childUrl = $child->getResolvedUrl($locale);
+                                                                $catImage = \Illuminate\Support\Facades\Cache::remember(
+                                                                    'cat_thumb_v2_' . ($child->reference_id ?? 0), 3600,
+                                                                    function () use ($child) {
+                                                                        if ($child->type === 'category' && $child->reference_id) {
+                                                                            $col = \Lunar\Models\Collection::with('media')->find($child->reference_id);
+                                                                            if ($col) {
+                                                                                $img = $col->getFirstMediaUrl('images', 'thumb') ?: $col->getFirstMediaUrl('images');
+                                                                                if ($img) return $img;
+                                                                                $fp = $col->products()->with('media')->first();
+                                                                                return $fp?->getFirstMediaUrl('images', 'thumb') ?: $fp?->getFirstMediaUrl('images');
+                                                                            }
+                                                                        }
+                                                                        return null;
+                                                                    }
+                                                                );
+                                                            @endphp
+                                                            <a wire:navigate href="{{ $childUrl }}"
+                                                               class="flex items-center gap-3 py-2 px-2.5 rounded-lg group cursor-pointer"
+                                                               style="transition:background 0.15s ease"
+                                                               onmouseover="this.style.background='rgba(80,82,157,0.04)'"
+                                                               onmouseout="this.style.background='transparent'"
+                                                               @click="open = false">
+                                                                <div style="width:48px;height:48px;min-width:48px;border-radius:8px;overflow:hidden;background:#F7F7FA;display:flex;align-items:center;justify-content:center">
+                                                                    @if($catImage)
+                                                                        <img src="{{ $catImage }}" alt="{{ $childLabel }}" loading="eager" fetchpriority="low"
+                                                                             style="width:100%;height:100%;object-fit:contain;padding:3px">
+                                                                    @else
+                                                                        <svg style="width:22px;height:22px;color:#C8C8D8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                                                        </svg>
+                                                                    @endif
+                                                                </div>
+                                                                <span style="font-size:13px;font-weight:500;color:#2D2D3F;transition:color 0.15s ease"
+                                                                      onmouseover="this.style.color='#50529D'"
+                                                                      onmouseout="this.style.color='#2D2D3F'">{{ $childLabel }}</span>
+                                                            </a>
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <div class="flex items-center justify-between" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(80,82,157,0.05)">
+                                                <a wire:navigate href="{{ $megaItem->getResolvedUrl($locale) }}"
+                                                   style="font-size:13px;font-weight:600;color:#50529D;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s ease"
+                                                   onmouseover="this.style.gap='10px'" onmouseout="this.style.gap='6px'"
+                                                   @click="open = false">
+                                                    {{ __('View All') }} {{ $megaItem->getTranslatedLabel($locale) }}
+                                                    <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                                </a>
+                                                <div class="flex items-center" style="gap:20px;font-size:11px;color:#9B9BB0">
+                                                    <span class="flex items-center" style="gap:5px">
+                                                        <svg style="width:13px;height:13px;color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                        {{ __('Official Warranty') }}
+                                                    </span>
+                                                    <span class="flex items-center" style="gap:5px">
+                                                        <svg style="width:13px;height:13px;color:#3b82f6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                        {{ __('Fast Delivery') }}
+                                                    </span>
+                                                    <span class="flex items-center" style="gap:5px">
+                                                        <svg style="width:13px;height:13px;color:#f59e0b" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                                        {{ __('Expert Support') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
-                        </a>
-                        @if($hasChildren)
-                            {{-- Invisible bridge to prevent hover gap between menu item and mega panel --}}
-                            <div x-show="open" class="absolute left-0 right-0 bottom-0 h-2" style="transform:translateY(100%)"></div>
-                        @endif
-                    </li>
+                        </li>
+                    @else
+                        <li>
+                            <a wire:navigate href="{{ $url }}"
+                               class="relative flex items-center gap-1.5 px-5 py-4 text-[13px] font-semibold uppercase tracking-wider text-gray-600 hover:text-primary transition-colors duration-200">
+                                {{ $label }}
+                            </a>
+                        </li>
+                    @endif
                 @endforeach
             </ul>
         </div>
 
-        {{-- Single Mega Panel --}}
+        {{-- Backdrop --}}
         @if($megaChildren->isNotEmpty())
-            <div x-show="open" x-cloak
-                 style="position:absolute;left:0;right:0;z-index:50"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 translate-y-[-4px]"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 x-transition:leave="transition ease-in duration-150"
-                 x-transition:leave-start="opacity-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 translate-y-[-4px]"
-                 @mouseenter="open = true" @mouseleave="open = false">
-
-                <div style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)">
-                    <div class="max-w-[1400px] mx-auto" style="padding:28px 24px 20px">
-                        <div class="flex">
-                            @foreach($megaCols as $colIndex => $colItems)
-                                <div class="flex-1" style="{{ $colIndex < $megaCols->count() - 1 ? 'border-right:1px solid rgba(80,82,157,0.05);padding-right:16px;margin-right:16px' : '' }}">
-                                    @foreach($colItems as $child)
-                                        @php
-                                            $childLabel = $child->getTranslatedLabel($locale);
-                                            $childUrl = $child->getResolvedUrl($locale);
-                                            $catImage = \Illuminate\Support\Facades\Cache::remember(
-                                                'cat_thumb_v2_' . ($child->reference_id ?? 0), 3600,
-                                                function () use ($child) {
-                                                    if ($child->type === 'category' && $child->reference_id) {
-                                                        $col = \Lunar\Models\Collection::with('media')->find($child->reference_id);
-                                                        if ($col) {
-                                                            // Prefer category's own image
-                                                            $img = $col->getFirstMediaUrl('images', 'thumb') ?: $col->getFirstMediaUrl('images');
-                                                            if ($img) return $img;
-                                                            // Fallback to first product image
-                                                            $fp = $col->products()->with('media')->first();
-                                                            return $fp?->getFirstMediaUrl('images', 'thumb') ?: $fp?->getFirstMediaUrl('images');
-                                                        }
-                                                    }
-                                                    return null;
-                                                }
-                                            );
-                                        @endphp
-                                        <a wire:navigate href="{{ $childUrl }}"
-                                           class="flex items-center gap-3 py-2 px-2.5 rounded-lg group"
-                                           style="transition:background 0.15s ease"
-                                           onmouseover="this.style.background='rgba(80,82,157,0.04)'"
-                                           onmouseout="this.style.background='transparent'"
-                                           @click="open = false">
-                                            <div style="width:48px;height:48px;min-width:48px;border-radius:8px;overflow:hidden;background:#F7F7FA;display:flex;align-items:center;justify-content:center">
-                                                @if($catImage)
-                                                    <img src="{{ $catImage }}" alt="{{ $childLabel }}" loading="eager" fetchpriority="low"
-                                                         style="width:100%;height:100%;object-fit:contain;padding:3px">
-                                                @else
-                                                    <svg style="width:22px;height:22px;color:#C8C8D8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                                    </svg>
-                                                @endif
-                                            </div>
-                                            <span style="font-size:13px;font-weight:500;color:#2D2D3F;transition:color 0.15s ease"
-                                                  onmouseover="this.style.color='#50529D'"
-                                                  onmouseout="this.style.color='#2D2D3F'">{{ $childLabel }}</span>
-                                        </a>
-                                    @endforeach
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="flex items-center justify-between" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(80,82,157,0.05)">
-                            <a wire:navigate href="{{ $megaItem->getResolvedUrl($locale) }}"
-                               style="font-size:13px;font-weight:600;color:#50529D;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s ease"
-                               onmouseover="this.style.gap='10px'" onmouseout="this.style.gap='6px'"
-                               @click="open = false">
-                                {{ __('View All') }} {{ $megaItem->getTranslatedLabel($locale) }}
-                                <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                            </a>
-                            <div class="flex items-center" style="gap:20px;font-size:11px;color:#9B9BB0">
-                                <span class="flex items-center" style="gap:5px">
-                                    <svg style="width:13px;height:13px;color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    {{ __('Official Warranty') }}
-                                </span>
-                                <span class="flex items-center" style="gap:5px">
-                                    <svg style="width:13px;height:13px;color:#3b82f6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    {{ __('Fast Delivery') }}
-                                </span>
-                                <span class="flex items-center" style="gap:5px">
-                                    <svg style="width:13px;height:13px;color:#f59e0b" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                                    {{ __('Expert Support') }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Backdrop --}}
             <div x-show="open" x-cloak
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                  x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
