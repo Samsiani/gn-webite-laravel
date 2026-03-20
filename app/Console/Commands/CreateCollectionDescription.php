@@ -25,6 +25,7 @@ class CreateCollectionDescription extends Command
         Attribute::firstOrCreate(
             ['attribute_group_id' => $group->id, 'handle' => 'name'],
             [
+                'attribute_type' => 'collection',
                 'name' => ['en' => 'Name', 'ka' => 'სახელი'],
                 'type' => \Lunar\FieldTypes\TranslatedText::class,
                 'position' => 1,
@@ -41,6 +42,7 @@ class CreateCollectionDescription extends Command
         $desc = Attribute::firstOrCreate(
             ['attribute_group_id' => $group->id, 'handle' => 'description'],
             [
+                'attribute_type' => 'collection',
                 'name' => ['en' => 'Description', 'ka' => 'აღწერა'],
                 'type' => \Lunar\FieldTypes\TranslatedText::class,
                 'position' => 2,
