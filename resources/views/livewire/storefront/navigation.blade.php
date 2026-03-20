@@ -13,10 +13,10 @@
     {{-- Desktop --}}
     <nav class="hidden lg:block relative"
          x-data="{
-             open: false,
-             _timer: null,
-             show() { clearTimeout(this._timer); this.open = true; },
-             hide() { this._timer = setTimeout(() => { this.open = false; }, 80); }
+             megaOpen: false,
+             _t: null,
+             megaShow() { clearTimeout(this._t); this.megaOpen = true; },
+             megaHide() { this._t = setTimeout(() => this.megaOpen = false, 120); }
          }">
         <div class="max-w-[1400px] mx-auto px-4">
             <ul class="flex items-center">
@@ -26,15 +26,20 @@
                         $url = $item->getResolvedUrl($locale);
                         $hasChildren = $item->children->isNotEmpty();
                     @endphp
-                    <li @if($hasChildren) @mouseenter="show()" @mouseleave="hide()" @else @mouseenter="open = false" @endif>
+                    <li @if($hasChildren)
+                            @mouseenter="megaShow()"
+                            @mouseleave="megaHide()"
+                        @else
+                            @mouseenter="clearTimeout(_t); megaOpen = false"
+                        @endif>
                         <a wire:navigate href="{{ $url }}"
-                           class="relative flex items-center gap-1.5 px-5 py-4 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer"
-                           :class="open && {{ $hasChildren ? 'true' : 'false' }} ? 'text-primary' : 'text-gray-600 hover:text-primary'">
+                           class="relative flex items-center gap-1.5 px-4 py-3.5 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer"
+                           :class="megaOpen && {{ $hasChildren ? 'true' : 'false' }} ? 'text-primary' : 'text-gray-600 hover:text-primary'">
                             {{ $label }}
                             @if($hasChildren)
-                                <svg class="w-3 h-3 transition-transform duration-300" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                <span class="absolute bottom-0 left-5 right-5 h-[2px] rounded-full transition-all duration-300 pointer-events-none"
-                                      :class="open ? 'bg-primary scale-x-100' : 'bg-transparent scale-x-0'"
+                                <svg class="w-3 h-3 transition-transform duration-300" :class="megaOpen && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                <span class="absolute bottom-0 left-4 right-4 h-[2px] rounded-full transition-all duration-300 pointer-events-none"
+                                      :class="megaOpen ? 'bg-primary scale-x-100' : 'bg-transparent scale-x-0'"
                                       style="transform-origin:left"></span>
                             @endif
                         </a>
@@ -43,19 +48,21 @@
             </ul>
         </div>
 
-        {{-- Mega Panel (sibling of <ul>, full-width under nav bar) --}}
+        {{-- Single Mega Panel --}}
         @if($megaChildren->isNotEmpty())
-            <div x-show="open" x-cloak
+            <div x-show="megaOpen" x-cloak
+                 class="pointer-events-none"
                  style="position:absolute;left:0;right:0;z-index:50;top:100%"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-1"
                  x-transition:enter-end="opacity-100 translate-y-0"
-                 x-transition:leave="transition ease-in duration-120"
+                 x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 -translate-y-1"
-                 @mouseenter="show()" @mouseleave="hide()">
+                 x-transition:leave-end="opacity-0 -translate-y-1">
 
-                <div style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)">
+                <div class="pointer-events-auto"
+                     style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)"
+                     @mouseenter="megaShow()" @mouseleave="megaHide()">
                     <div class="max-w-[1400px] mx-auto" style="padding:28px 24px 20px">
                         <div class="flex">
                             @foreach($megaCols as $colIndex => $colItems)
@@ -85,7 +92,7 @@
                                            style="transition:background 0.15s ease"
                                            onmouseover="this.style.background='rgba(80,82,157,0.04)'"
                                            onmouseout="this.style.background='transparent'"
-                                           @click="open = false">
+                                           @click="megaOpen = false">
                                             <div style="width:48px;height:48px;min-width:48px;border-radius:8px;overflow:hidden;background:#F7F7FA;display:flex;align-items:center;justify-content:center">
                                                 @if($catImage)
                                                     <img src="{{ $catImage }}" alt="{{ $childLabel }}" loading="eager" fetchpriority="low"
@@ -110,7 +117,7 @@
                                class="cursor-pointer"
                                style="font-size:13px;font-weight:600;color:#50529D;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s ease"
                                onmouseover="this.style.gap='10px'" onmouseout="this.style.gap='6px'"
-                               @click="open = false">
+                               @click="megaOpen = false">
                                 {{ __('View All') }} {{ $megaItem->getTranslatedLabel($locale) }}
                                 <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
@@ -134,11 +141,11 @@
             </div>
 
             {{-- Backdrop --}}
-            <div x-show="open" x-cloak
+            <div x-show="megaOpen" x-cloak
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                  x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                  class="fixed inset-0" style="background:rgba(0,0,0,0.06);z-index:40"
-                 @click="open = false"></div>
+                 @click="megaOpen = false"></div>
         @endif
     </nav>
 </div>
