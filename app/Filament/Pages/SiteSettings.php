@@ -106,6 +106,17 @@ class SiteSettings extends Page implements HasForms
                     ->collapsible()
                     ->collapsed(),
 
+                Section::make('Shop Page')
+                    ->description('How the main /shop page displays')
+                    ->icon('heroicon-o-squares-2x2')
+                    ->schema([
+                        Toggle::make('shop_categories_only')
+                            ->label('Show category grid instead of products')
+                            ->helperText('When ON, /shop displays a category grid. Clicking a category shows products with sidebar filters. When OFF, /shop shows the default product listing.'),
+                    ])
+                    ->columns(1)
+                    ->collapsible(),
+
                 Section::make('Contact Form')
                     ->description('Where contact form submissions are sent')
                     ->icon('heroicon-o-envelope')
@@ -245,6 +256,8 @@ class SiteSettings extends Page implements HasForms
             'schema_email' => 'info@gn.ge',
             'schema_logo' => 'https://laravel.gn.ge/images/logo.png',
             'schema_url' => 'https://gn.ge',
+            // Shop
+            'shop_categories_only' => false,
             // Contact/Mail
             'contact_email' => 'info@gn.ge',
             'mail_host' => '',

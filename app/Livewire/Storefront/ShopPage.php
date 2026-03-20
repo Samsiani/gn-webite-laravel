@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Storefront;
 
+use App\Filament\Pages\SiteSettings;
 use App\Services\StorefrontData;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -57,31 +58,44 @@ class ShopPage extends Component
 
     public function render()
     {
-        $useMeilisearch = config('scout.driver') === 'meilisearch';
+        $settings = SiteSettings::getSettings();
+        $categoriesOnly = !empty($settings['shop_categories_only']);
+        $hasFilters = $this->q || $this->categoryId || $this->priceMin || $this->priceMax;
 
-        if ($useMeilisearch) {
-            $products = $this->searchWithMeilisearch();
-        } else {
-            $products = $this->searchWithEloquent();
-        }
+        // Show category grid when setting is on and no filters/search active
+        $showCategoryGrid = $categoriesOnly && !$hasFilters;
 
-        // All root categories with product counts
+        // All root categories with product counts + media
         $categories = StorefrontData::categoriesWithCounts();
 
-        $hasFilters = $this->q || $this->categoryId || $this->priceMin || $this->priceMax;
+        if ($showCategoryGrid) {
+            // Load media for category images
+            $categories->load('media');
+
+            // Empty paginator — no products needed
+            $products = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+        } else {
+            $useMeilisearch = config('scout.driver') === 'meilisearch';
+            $products = $useMeilisearch ? $this->searchWithMeilisearch() : $this->searchWithEloquent();
+        }
 
         $shopTitle = $this->q
             ? __('Search') . ': "' . $this->q . '"'
             : __('Shop');
 
+        $metaDesc = $showCategoryGrid
+            ? __('Browse our product categories — professional kitchen equipment.')
+            : __('Browse our catalog of professional kitchen equipment. :count products available.', ['count' => $products->total()]);
+
         return view('livewire.storefront.shop-page', [
             'products' => $products,
             'categories' => $categories,
             'hasFilters' => $hasFilters,
+            'showCategoryGrid' => $showCategoryGrid,
         ])->layout('components.layouts.storefront', [
             'categories' => $categories,
             'metaTitle' => \App\Services\SeoHelper::title($shopTitle),
-            'metaDescription' => __('Browse our catalog of professional kitchen equipment. :count products available.', ['count' => $products->total()]),
+            'metaDescription' => $metaDesc,
             'canonical' => url(app()->getLocale() === 'ka' ? '/shop' : '/' . app()->getLocale() . '/shop'),
             'hreflangs' => ['ka' => url('/shop'), 'en' => url('/en/shop'), 'ru' => url('/ru/shop')],
         ]);
