@@ -61,7 +61,7 @@
                  x-transition:leave-end="opacity-0 -translate-y-1">
 
                 <div class="pointer-events-auto"
-                     style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)"
+                     style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 8px 24px rgba(80,82,157,0.08);clip-path:inset(0 -40px -40px -40px)"
                      @mouseenter="megaShow()" @mouseleave="megaHide()">
                     <div class="max-w-[1400px] mx-auto" style="padding:28px 24px 20px">
                         <div class="flex">
