@@ -20,18 +20,22 @@
                         $url = $item->getResolvedUrl($locale);
                         $hasChildren = $item->children->isNotEmpty();
                     @endphp
-                    <li @if($hasChildren) @mouseenter="open = true" @else @mouseenter="open = false" @endif>
+                    <li class="relative" @if($hasChildren) @mouseenter="open = true" @else @mouseenter="open = false" @endif>
                         <a wire:navigate href="{{ $url }}"
-                           class="relative flex items-center gap-1.5 px-4 py-3.5 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200"
+                           class="relative flex items-center gap-1.5 px-5 py-4 text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200"
                            :class="open && {{ $hasChildren ? 'true' : 'false' }} ? 'text-primary' : 'text-gray-600 hover:text-primary'">
                             {{ $label }}
                             @if($hasChildren)
                                 <svg class="w-3 h-3 transition-transform duration-300" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                <span class="absolute bottom-0 left-4 right-4 h-[2px] rounded-full transition-all duration-300"
+                                <span class="absolute bottom-0 left-5 right-5 h-[2px] rounded-full transition-all duration-300"
                                       :class="open ? 'bg-primary scale-x-100' : 'bg-transparent scale-x-0'"
                                       style="transform-origin:left"></span>
                             @endif
                         </a>
+                        @if($hasChildren)
+                            {{-- Invisible bridge to prevent hover gap between menu item and mega panel --}}
+                            <div x-show="open" class="absolute left-0 right-0 bottom-0 h-2" style="transform:translateY(100%)"></div>
+                        @endif
                     </li>
                 @endforeach
             </ul>
