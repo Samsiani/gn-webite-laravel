@@ -36,7 +36,7 @@
                             @if($catImage)
                                 <img src="{{ $catImage }}" alt="{{ $catName }}" loading="lazy"
                                      onload="this.classList.add('loaded')"
-                                     class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105">
+                                     class="w-full h-full object-contain">
                             @else
                                 <svg class="w-16 h-16 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
