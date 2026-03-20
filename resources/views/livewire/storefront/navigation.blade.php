@@ -49,8 +49,6 @@
                  x-transition:leave-end="opacity-0 translate-y-[-4px]"
                  @mouseenter="open = true" @mouseleave="open = false">
 
-                <div style="height:2px;background:linear-gradient(90deg,#50529D,#7274C2,#50529D)"></div>
-
                 <div style="background:#fff;border-radius:0 0 12px 12px;box-shadow:0 12px 40px rgba(80,82,157,0.10),0 2px 8px rgba(0,0,0,0.03)">
                     <div class="max-w-[1400px] mx-auto" style="padding:28px 24px 20px">
                         <div class="flex">
